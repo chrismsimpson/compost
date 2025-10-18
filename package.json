@@ -1,5 +1,6 @@
 {
   "name": "foo",
+  "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "turbo run build"
   },

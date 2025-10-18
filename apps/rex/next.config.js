@@ -1,3 +1,6 @@
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+
 /** @type {import('next').NextConfig} */
 
 const remotePatterns = [
@@ -20,6 +23,17 @@ const config = {
     remotePatterns
   },
   serverExternalPackages: ['@electric-sql/pglite'],
+  webpack(config) {
+    config.resolve.extensionAlias = {
+      '.js': ['.js', '.ts'],
+      '.jsx': ['.jsx', '.tsx'],
+    };
+    config.resolve.fallback = {
+      http: require.resolve('stream-http'),
+      https: require.resolve('https-browserify'),
+    };
+    return config;
+  },
 };
 
 export default config;
