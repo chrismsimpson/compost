@@ -1,0 +1,13 @@
+{
+  "name": "foo",
+  "scripts": {
+    "build": "turbo run build"
+  },
+  "dependencies": {
+    "@biomejs/biome": "^2.2.5",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  }
+}
