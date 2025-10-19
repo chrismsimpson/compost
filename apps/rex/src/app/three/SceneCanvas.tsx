@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber';
 import { useMemo } from 'react';
+import { CameraHUD } from './CameraHUD';
 import { FPSControls } from './FPSControls';
 import { buildGridPoints, TileLayout, type TileLayoutKey } from './grid';
 
@@ -32,6 +33,8 @@ export default function SceneCanvas() {
           ))}
         </group>
       </Canvas>
+
+      <CameraHUD />
     </div>
   );
 }

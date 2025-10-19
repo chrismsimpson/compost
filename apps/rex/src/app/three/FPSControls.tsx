@@ -3,6 +3,8 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import { Euler, OrthographicCamera, PerspectiveCamera, Vector3 } from 'three';
+import { CAMERA_POSITION } from '~/constants/localStorage';
+import { useCameraStore } from './cameraStore';
 
 export function FPSControls() {
   const { camera, gl } = useThree();
@@ -38,25 +40,59 @@ export function FPSControls() {
 
   // Small helpers for logging
   const logCamera = (reason: string) => {
-    const position = [
-      +camera.position.x.toFixed(3),
-      +camera.position.y.toFixed(3),
-      +camera.position.z.toFixed(3),
-    ];
-    const rotation = {
-      x: +camera.rotation.x.toFixed(3),
-      y: +camera.rotation.y.toFixed(3),
-      z: +camera.rotation.z.toFixed(3),
-    };
-    const payload =
-      camera instanceof PerspectiveCamera
-        ? { position, rotation, fov: +camera.fov.toFixed(2) }
-        : camera instanceof OrthographicCamera
-          ? { position, rotation, zoom: +camera.zoom.toFixed(2) }
-          : { position, rotation };
 
-    // eslint-disable-next-line no-console
-    console.log(`pos: ${Object.values(payload.position)}; rot: ${Object.values(payload.rotation)}; ${'fov' in payload ? `fov: ${payload.fov}` : `zoom: ${payload.zoom}` }`);
+    const prevRaw = localStorage.getItem(CAMERA_POSITION);
+
+    const prev = JSON.parse(prevRaw || '{}');
+
+    const isStart = reason === 'start';
+
+    const position = isStart && prev.position 
+      ? prev.position
+      : [
+        +camera.position.x.toFixed(3),
+        +camera.position.y.toFixed(3),
+        +camera.position.z.toFixed(3),
+      ];
+
+    const rotation = isStart && prev.rotation
+      ? prev.rotation
+      : {
+        x: +camera.rotation.x.toFixed(3),
+        y: +camera.rotation.y.toFixed(3),
+        z: +camera.rotation.z.toFixed(3),
+      };
+
+    const fov = isStart && prev.fov !== undefined
+      ? prev.fov
+      : camera instanceof PerspectiveCamera
+        ? +camera.fov.toFixed(2)
+        : undefined;
+        
+    const zoom = isStart && prev.zoom !== undefined
+      ? prev.zoom
+      : camera instanceof OrthographicCamera
+        ? +camera.zoom.toFixed(2)
+        : undefined;
+    
+    if (isStart && position && rotation) {
+      camera.position.set(position[0], position[1], position[2]);
+      camera.rotation.set(rotation.x, rotation.y, rotation.z);
+      if (camera instanceof PerspectiveCamera && fov !== undefined) {
+        camera.fov = fov;
+      } else if (camera instanceof OrthographicCamera && zoom !== undefined) {
+        camera.zoom = zoom;
+      }
+      camera.updateProjectionMatrix();
+    }
+
+    useCameraStore.getState().setCamera(
+      reason,
+      position,
+      rotation,
+      fov,
+      zoom
+    );
   };
 
   const snapshot = () => {
