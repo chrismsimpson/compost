@@ -3,17 +3,16 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import { Euler, OrthographicCamera, PerspectiveCamera, Vector3 } from 'three';
-import { CAMERA_POSITION } from '~/constants/localStorage';
 import { useCameraStore } from './cameraStore';
 
-export function FPSControls() {
+export function FPSControls({ position }: { position?: number[] }) {
   const { camera, gl } = useThree();
 
   const isDown = useRef(false);
   const keysRef = useRef<Record<string, boolean>>({});
   const yawRef = useRef(0);
   const pitchRef = useRef(0);
-  const eulerRef = useRef(new Euler(0, 0, 0, 'YXZ'));
+  const eulerRef = useRef(new Euler(position?.[0] ?? 0, position?.[1] ?? 0, position?.[2] ?? 0, 'YXZ'));
   const forwardRef = useRef(new Vector3());
   const rightRef = useRef(new Vector3());
   const UP = useRef(new Vector3(0, 1, 0));
@@ -27,7 +26,7 @@ export function FPSControls() {
     inited: boolean;
   }>({
     pos: new Vector3(),
-    rot: new Euler(0, 0, 0, 'YXZ'),
+    rot: new Euler(position?.[0] ?? 0, position?.[1] ?? 0, position?.[2] ?? 0, 'YXZ'),
     fov: 0,
     zoom: 0,
     inited: false,
@@ -41,54 +40,29 @@ export function FPSControls() {
   // Small helpers for logging
   const logCamera = (reason: string) => {
 
-    const prevRaw = localStorage.getItem(CAMERA_POSITION);
+    const pos = [
+      +camera.position.x.toFixed(3),
+      +camera.position.y.toFixed(3),
+      +camera.position.z.toFixed(3),
+    ];
 
-    const prev = JSON.parse(prevRaw || '{}');
+    const rotation = {
+      x: +camera.rotation.x.toFixed(3),
+      y: +camera.rotation.y.toFixed(3),
+      z: +camera.rotation.z.toFixed(3),
+    };
 
-    const isStart = reason === 'start';
-
-    const position = isStart && prev.position 
-      ? prev.position
-      : [
-        +camera.position.x.toFixed(3),
-        +camera.position.y.toFixed(3),
-        +camera.position.z.toFixed(3),
-      ];
-
-    const rotation = isStart && prev.rotation
-      ? prev.rotation
-      : {
-        x: +camera.rotation.x.toFixed(3),
-        y: +camera.rotation.y.toFixed(3),
-        z: +camera.rotation.z.toFixed(3),
-      };
-
-    const fov = isStart && prev.fov !== undefined
-      ? prev.fov
-      : camera instanceof PerspectiveCamera
-        ? +camera.fov.toFixed(2)
-        : undefined;
+    const fov = camera instanceof PerspectiveCamera
+      ? +camera.fov.toFixed(2)
+      : undefined;
         
-    const zoom = isStart && prev.zoom !== undefined
-      ? prev.zoom
-      : camera instanceof OrthographicCamera
-        ? +camera.zoom.toFixed(2)
-        : undefined;
+    const zoom = camera instanceof OrthographicCamera
+      ? +camera.zoom.toFixed(2)
+      : undefined;
     
-    if (isStart && position && rotation) {
-      camera.position.set(position[0], position[1], position[2]);
-      camera.rotation.set(rotation.x, rotation.y, rotation.z);
-      if (camera instanceof PerspectiveCamera && fov !== undefined) {
-        camera.fov = fov;
-      } else if (camera instanceof OrthographicCamera && zoom !== undefined) {
-        camera.zoom = zoom;
-      }
-      camera.updateProjectionMatrix();
-    }
-
     useCameraStore.getState().setCamera(
       reason,
-      position,
+      pos,
       rotation,
       fov,
       zoom
@@ -135,7 +109,12 @@ export function FPSControls() {
     camera.lookAt(0, 0, 0);
 
     // Seed yaw/pitch from the current camera quaternion
-    const e = new Euler(0, 0, 0, 'YXZ').setFromQuaternion(
+
+    const e = new Euler(
+      position?.[0] ?? 0, 
+      position?.[1] ?? 0, 
+      position?.[2] ?? 0, 
+      'YXZ').setFromQuaternion(
       camera.quaternion,
       'YXZ'
     );
