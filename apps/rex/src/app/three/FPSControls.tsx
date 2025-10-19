@@ -16,10 +16,82 @@ export function FPSControls() {
   const rightRef = useRef(new Vector3());
   const UP = useRef(new Vector3(0, 1, 0));
 
+  // Track last logged snapshot to print only on change
+  const lastRef = useRef<{
+    pos: Vector3;
+    rot: Euler;
+    fov: number;
+    zoom: number;
+    inited: boolean;
+  }>({
+    pos: new Vector3(),
+    rot: new Euler(0, 0, 0, 'YXZ'),
+    fov: 0,
+    zoom: 0,
+    inited: false,
+  });
+
   const sensitivity = 0.002; // mouse look sensitivity
   const moveSpeed = 4; // units per second
   const minFov = 25;
   const maxFov = 85;
+
+  // Small helpers for logging
+  const logCamera = (reason: string) => {
+    const position = [
+      +camera.position.x.toFixed(3),
+      +camera.position.y.toFixed(3),
+      +camera.position.z.toFixed(3),
+    ];
+    const rotation = {
+      x: +camera.rotation.x.toFixed(3),
+      y: +camera.rotation.y.toFixed(3),
+      z: +camera.rotation.z.toFixed(3),
+    };
+    const payload =
+      camera instanceof PerspectiveCamera
+        ? { position, rotation, fov: +camera.fov.toFixed(2) }
+        : camera instanceof OrthographicCamera
+          ? { position, rotation, zoom: +camera.zoom.toFixed(2) }
+          : { position, rotation };
+
+    // eslint-disable-next-line no-console
+    console.log(`pos: ${Object.values(payload.position)}; rot: ${Object.values(payload.rotation)}; ${'fov' in payload ? `fov: ${payload.fov}` : `zoom: ${payload.zoom}` }`);
+  };
+
+  const snapshot = () => {
+    lastRef.current.pos.copy(camera.position);
+    lastRef.current.rot.copy(camera.rotation);
+    if (camera instanceof PerspectiveCamera) {
+      lastRef.current.fov = camera.fov;
+    } else if (camera instanceof OrthographicCamera) {
+      lastRef.current.zoom = camera.zoom;
+    }
+    lastRef.current.inited = true;
+  };
+
+  const hasChanged = () => {
+    if (!lastRef.current.inited) return true;
+    const epsPos = 1e-5;
+    const epsRot = 1e-5;
+
+    const dPx = Math.abs(camera.position.x - lastRef.current.pos.x) > epsPos;
+    const dPy = Math.abs(camera.position.y - lastRef.current.pos.y) > epsPos;
+    const dPz = Math.abs(camera.position.z - lastRef.current.pos.z) > epsPos;
+
+    const dRx = Math.abs(camera.rotation.x - lastRef.current.rot.x) > epsRot;
+    const dRy = Math.abs(camera.rotation.y - lastRef.current.rot.y) > epsRot;
+    const dRz = Math.abs(camera.rotation.z - lastRef.current.rot.z) > epsRot;
+
+    let dProj = false;
+    if (camera instanceof PerspectiveCamera) {
+      dProj = Math.abs(camera.fov - lastRef.current.fov) > 1e-5;
+    } else if (camera instanceof OrthographicCamera) {
+      dProj = Math.abs(camera.zoom - lastRef.current.zoom) > 1e-5;
+    }
+
+    return dPx || dPy || dPz || dRx || dRy || dRz || dProj;
+  };
 
   useEffect(() => {
     // Initial orientation to look at origin (keeps your initial position from Canvas)
@@ -34,6 +106,10 @@ export function FPSControls() {
     yawRef.current = e.y;
     pitchRef.current = e.x;
 
+    // Log starting camera values
+    logCamera('start');
+    snapshot();
+
     const canvas = gl.domElement;
 
     const onDown = () => {
@@ -45,7 +121,6 @@ export function FPSControls() {
     };
 
     const onMouseMove = (event: MouseEvent) => {
-      // if (!isLockedRef.current) return;
       if (!isDown.current) return;
       yawRef.current -= event.movementX * sensitivity;
       pitchRef.current -= event.movementY * sensitivity;
@@ -54,6 +129,7 @@ export function FPSControls() {
       const maxPitch = Math.PI / 2 - 0.01;
       if (pitchRef.current > maxPitch) pitchRef.current = maxPitch;
       if (pitchRef.current < -maxPitch) pitchRef.current = -maxPitch;
+      // rotation applied in useFrame; we'll log there
     };
 
     const onWheel = (event: WheelEvent) => {
@@ -64,9 +140,14 @@ export function FPSControls() {
       } else if (camera instanceof OrthographicCamera) {
         const minZoom = 0.5;
         const maxZoom = 4;
-        camera.zoom = Math.min(maxZoom, Math.max(minZoom, camera.zoom - delta * 0.1));
+        camera.zoom = Math.min(
+          maxZoom,
+          Math.max(minZoom, camera.zoom - delta * 0.1)
+        );
       }
       camera.updateProjectionMatrix();
+      logCamera('wheel');
+      snapshot();
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -92,7 +173,6 @@ export function FPSControls() {
     window.addEventListener('keyup', onKeyUp);
 
     return () => {
-
       canvas.removeEventListener('mousedown', onDown);
       canvas.removeEventListener('mouseup', onUp);
       canvas.removeEventListener('mousemove', onMouseMove);
@@ -129,6 +209,12 @@ export function FPSControls() {
     }
     if (keysRef.current['KeyD']) {
       camera.position.addScaledVector(rightRef.current, distance);
+    }
+
+    // Log only when something actually changed
+    if (hasChanged()) {
+      logCamera('update');
+      snapshot();
     }
   });
 
