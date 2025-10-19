@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber';
 import { useMemo } from 'react';
+import { FPSControls } from './FPSControls';
 import { buildGridPoints, TileLayout, type TileLayoutKey } from './grid';
 
 export default function SceneCanvas() {
@@ -13,11 +14,12 @@ export default function SceneCanvas() {
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      {/* Move camera to a simple isometric-ish angle */}
+      {/* Camera starts at a simple isometric-ish position; lookAt set in FPSControls */}
       <Canvas camera={{ position: [8, 8, 8], fov: 60 }}>
+        <FPSControls />
+
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 10, 5]} intensity={0.8} />
-        {/* Helpful axes (X: red, Y: green, Z: blue) */}
         <axesHelper args={[5]} />
 
         {/* Rotate the grid from the XY plane down onto the XZ plane */}
