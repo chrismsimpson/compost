@@ -2,12 +2,10 @@
 
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
-import { Euler, Vector3 } from 'three';
+import { Euler, OrthographicCamera, PerspectiveCamera, Vector3 } from 'three';
 
 export function FPSControls() {
   const { camera, gl } = useThree();
-
-  // const isLockedRef = useRef(false);
 
   const isDown = useRef(false);
   const keysRef = useRef<Record<string, boolean>>({});
@@ -38,17 +36,6 @@ export function FPSControls() {
 
     const canvas = gl.domElement;
 
-    // const onClick = () => {
-    // //   // request pointer lock on click to enable mouse look
-    // //   canvas.requestPointerLock();
-    // };
-
-    // const onPointerLockChange = () => {
-    //   isLockedRef.current = document.pointerLockElement === canvas;
-    // };
-
-
-
     const onDown = () => {
       isDown.current = true;
     };
@@ -72,7 +59,13 @@ export function FPSControls() {
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const delta = Math.sign(event.deltaY);
-      camera.fov = Math.min(maxFov, Math.max(minFov, camera.fov + delta * 2));
+      if (camera instanceof PerspectiveCamera) {
+        camera.fov = Math.min(maxFov, Math.max(minFov, camera.fov + delta * 2));
+      } else if (camera instanceof OrthographicCamera) {
+        const minZoom = 0.5;
+        const maxZoom = 4;
+        camera.zoom = Math.min(maxZoom, Math.max(minZoom, camera.zoom - delta * 0.1));
+      }
       camera.updateProjectionMatrix();
     };
 
@@ -90,22 +83,21 @@ export function FPSControls() {
       }
     };
 
-    // canvas.addEventListener('click', onClick);
     canvas.addEventListener('mousedown', onDown);
     canvas.addEventListener('mouseup', onUp);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('wheel', onWheel, { passive: false });
-    // document.addEventListener('pointerlockchange', onPointerLockChange);
+
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
     return () => {
-      // canvas.removeEventListener('click', onClick);
+
       canvas.removeEventListener('mousedown', onDown);
       canvas.removeEventListener('mouseup', onUp);
       canvas.removeEventListener('mousemove', onMouseMove);
       canvas.removeEventListener('wheel', onWheel);
-      // document.removeEventListener('pointerlockchange', onPointerLockChange);
+
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
