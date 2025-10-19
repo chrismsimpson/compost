@@ -6,8 +6,8 @@ import { buildGridPoints, TileLayout, type TileLayoutKey } from './grid';
 
 export default function SceneCanvas() {
   // change to TileLayout.square to compare layouts
-  // const layout: TileLayoutKey = TileLayout.hex;
-  const layout: TileLayoutKey = TileLayout.square;
+  const layout: TileLayoutKey = TileLayout.hex;
+  // const layout: TileLayoutKey = TileLayout.square;
 
   const points = useMemo(() => buildGridPoints(layout, 4, 1), [layout]);
 
