@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 import { Euler, OrthographicCamera, PerspectiveCamera, Vector3 } from 'three';
 import { useCameraStore } from './cameraStore';
 
-export function FPSControls({ position }: { position?: number[] }) {
+export function FPSControls({ position, rotation, fov, zoom }: { position?: number[]; rotation?: { x: number; y: number; z: number }, fov?: number; zoom?: number }) {
   const { camera, gl } = useThree();
 
   const isDown = useRef(false);
@@ -110,18 +110,31 @@ export function FPSControls({ position }: { position?: number[] }) {
 
     // Seed yaw/pitch from the current camera quaternion
 
-    const e = new Euler(
-      position?.[0] ?? 0, 
-      position?.[1] ?? 0, 
-      position?.[2] ?? 0, 
-      'YXZ').setFromQuaternion(
-      camera.quaternion,
-      'YXZ'
-    );
-    yawRef.current = e.y;
-    pitchRef.current = e.x;
+    if (position && position.length === 3) {
+      camera.position.set(position[0], position[1], position[2]);
+    }
 
-    // Log starting camera values
+    if (rotation) {
+      camera.rotation.set(rotation.x, rotation.y, rotation.z, 'YXZ');
+      yawRef.current = rotation.y;
+      pitchRef.current = rotation.x;
+    } else {
+      // Seed yaw/pitch from current orientation and look at origin
+      const e = new Euler(0, 0, 0, 'YXZ').setFromQuaternion(camera.quaternion, 'YXZ');
+      yawRef.current = e.y;
+      pitchRef.current = e.x;
+      camera.lookAt(0, 0, 0);
+    }
+
+    if (typeof fov === 'number' && camera instanceof PerspectiveCamera) {
+      camera.fov = Math.min(maxFov, Math.max(minFov, fov));
+      camera.updateProjectionMatrix();
+    }
+    if (typeof zoom === 'number' && camera instanceof OrthographicCamera) {
+      camera.zoom = zoom;
+      camera.updateProjectionMatrix();
+    }
+    
     logCamera('start');
     snapshot();
 

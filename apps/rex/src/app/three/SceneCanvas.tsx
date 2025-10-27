@@ -8,29 +8,33 @@ import { FPSControls } from './FPSControls';
 import { buildGridPoints, TileLayout, type TileLayoutKey } from './grid';
 
 export default function SceneCanvas() {
-  // change to TileLayout.square to compare layouts
-  // const layout: TileLayoutKey = TileLayout.hex;
   const layout: TileLayoutKey = TileLayout.square;
 
   const points = useMemo(() => buildGridPoints(layout, 4, 1), [layout]);
 
-  const prevRaw = localStorage.getItem(CAMERA_POSITION);
-
-  const prev = JSON.parse(prevRaw || '{}');
-
-  
+  const prev = useMemo(() => {
+    if (typeof window === 'undefined') return {} as any;
+    try {
+      return JSON.parse(window.localStorage.getItem(CAMERA_POSITION) ?? '{}');
+    } catch {
+      return {} as any;
+    }
+  }, []);
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      {/* Camera starts at a simple isometric-ish position; lookAt set in FPSControls */}
       <Canvas camera={{ position: [8, 8, 8], fov: 60 }}>
-        <FPSControls position={prev.position} />
+        <FPSControls
+          position={prev.position}
+          rotation={prev.rotation}
+          fov={prev.fov}
+          zoom={prev.zoom}
+        />
 
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 10, 5]} intensity={0.8} />
         <axesHelper args={[5]} />
 
-        {/* Rotate the grid from the XY plane down onto the XZ plane */}
         <group rotation={[-Math.PI / 2, 0, 0]}>
           {points.map((p, i) => (
             <mesh key={i} position={p as [number, number, number]}>
