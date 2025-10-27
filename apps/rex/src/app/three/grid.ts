@@ -1,4 +1,4 @@
-// apps/rex/src/app/three/grid.ts
+
 export const TileLayout = {
   square: 'square',
   hex: 'hex',

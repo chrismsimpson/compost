@@ -1,6 +1,6 @@
 'use client';
 
-import { useCameraStore } from './cameraStore';
+import { useCameraStore } from '~/app/three/cameraStore';
 
 export function CameraHUD() {
   const position = useCameraStore(state => state.position);

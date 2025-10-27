@@ -3,7 +3,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useRef } from 'react';
 import { Euler, OrthographicCamera, PerspectiveCamera, Vector3 } from 'three';
-import { useCameraStore } from './cameraStore';
+import { useCameraStore } from '~/app/three/cameraStore';
 
 export function FPSControls({ position, rotation, fov, zoom }: { position?: number[]; rotation?: { x: number; y: number; z: number }, fov?: number; zoom?: number }) {
   const { camera, gl } = useThree();
