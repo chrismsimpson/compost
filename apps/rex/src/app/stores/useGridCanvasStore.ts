@@ -1,15 +1,21 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-
 import { Transform } from 'pixi.js';
+import { Mutable } from '@compost/common/types/mutable';
 
 export interface GridCanvasState {
   private: {
-    componentSize: [number, number];
+    canvasSize: [number, number];
   };
 
-  isFoo?: boolean;
-  setIsFoo: (isFoo: boolean) => void;
+  transform: Transform;
+
+  selectionBox: Mutable<[number, number, number, number]>;
+
+  setCanvasSize: (size: [number, number]) => void;
+
+  isFocused: boolean;
+  setIsFocused: (focused: boolean) => void;
 }
 
 export const useGridCanvasStore = create<GridCanvasState>()(
@@ -18,10 +24,23 @@ export const useGridCanvasStore = create<GridCanvasState>()(
 
     return {
       private: {
-        componentSize: [0, 0],
+        canvasSize: [0, 0],
       },
-      isFoo: false,
-      setIsFoo: (isFoo: boolean) => set({ isFoo }),
+
+      transform,
+
+      selectionBox: new Mutable([0, 0, 0, 0]),
+
+      setCanvasSize: (newSize: [number, number]) => {
+        set(state => ({
+          private: { ...state.private, canvasSize: newSize },
+        }));
+      },
+
+      isFocused: false,
+      setIsFocused: (focused: boolean) => {
+        set({ isFocused: focused });
+      },
     };
   })
 );
