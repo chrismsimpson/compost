@@ -2,7 +2,38 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Transform } from 'pixi.js';
 import { Mutable } from '@compost/common/types/mutable';
-import { clamp } from 'lodash';
+// import { clamp } from 'lodash';
+
+export const GRID_CANVAS_BOUND = 1000;
+
+export const BOUNDARY_BUFFER_PX = 80;
+
+export const DEFAULT_BOUNDS: [number, number, number, number] = [
+  -GRID_CANVAS_BOUND,
+  -GRID_CANVAS_BOUND,
+  GRID_CANVAS_BOUND,
+  GRID_CANVAS_BOUND,
+];
+
+const clampPanAxis = (
+  translate: number,
+  scale: number,
+  worldMin: number,
+  worldMax: number,
+  viewport: number,
+  bufferPx: number
+): number => {
+  const content = (worldMax - worldMin) * scale;
+
+  if (content + bufferPx * 2 <= viewport) {
+    return (viewport - content) / 2 - worldMin * scale;
+  }
+
+  const minTranslate = viewport - bufferPx - worldMax * scale;
+  const maxTranslate = bufferPx - worldMin * scale;
+
+  return Math.min(maxTranslate, Math.max(minTranslate, translate));
+};
 
 export interface GridCanvasState {
   private: {
@@ -64,28 +95,44 @@ export const useGridCanvasStore = create<GridCanvasState>()(
       },
 
       scrollCanvas: (dx: number, dy: number) => {
-        const canvasWidth = get().private.canvasSize[0];
-        const canvasHeight = get().private.canvasSize[1];
+        const {
+          private: { canvasSize },
+          transform,
+        } = get();
+
+        const [canvasWidth, canvasHeight] = canvasSize;
+
+        const scale = transform.scale.x;
 
         const leftMostX = 0;
         const topMostY = 0;
-
         const rightMostX = 0;
         const bottomMostY = 0;
 
-        const transform = get().transform;
+        const minX = leftMostX - GRID_CANVAS_BOUND;
+        const minY = topMostY - GRID_CANVAS_BOUND;
+        const maxX = rightMostX + GRID_CANVAS_BOUND;
+        const maxY = bottomMostY + GRID_CANVAS_BOUND;
 
-        const zoom = transform.scale.x;
+        const tx = clampPanAxis(
+          transform.position.x + dx,
+          scale,
+          minX,
+          maxX,
+          canvasWidth,
+          BOUNDARY_BUFFER_PX * scale
+        );
 
-        const minX = (leftMostX - 1000) * zoom - canvasWidth * 0.2;
-        const maxX = (rightMostX + 1000) * zoom - canvasWidth * 0.8;
-        const minY = (topMostY - 1000) * zoom - canvasHeight * 0.2;
-        const maxY = (bottomMostY + 1000) * zoom - canvasHeight * 0.8;
+        const ty = clampPanAxis(
+          transform.position.y + dy,
+          scale,
+          minY,
+          maxY,
+          canvasHeight,
+          BOUNDARY_BUFFER_PX * scale
+        );
 
-        const newX = clamp(-(transform.position.x + dx), minX, maxX);
-        const newY = clamp(-(transform.position.y + dy), minY, maxY);
-
-        transform.position.set(-newX, -newY);
+        transform.position.set(tx, ty);
       },
     };
   })

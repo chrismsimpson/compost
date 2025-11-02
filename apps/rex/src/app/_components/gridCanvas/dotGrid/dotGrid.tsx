@@ -8,7 +8,10 @@ import {
   UniformGroup,
 } from 'pixi.js';
 import { dotGridProgram } from '~/app/_components/gridCanvas/dotGrid/dotGrid.shader';
-import { useGridCanvasStore } from '~/app/stores/useGridCanvasStore';
+import {
+  useGridCanvasStore,
+  GRID_CANVAS_BOUND,
+} from '~/app/stores/useGridCanvasStore';
 import { cardGeometry } from '~/app/_components/gridCanvas/card/card.geometry';
 
 interface DotGridProps {
@@ -34,13 +37,11 @@ export const DotGrid = memo(function DotGrid(props: DotGridProps) {
 
   const boundingBox = useRef([minX, minY, maxX, maxY]);
 
-  const n = 1000;
-
   useEffect(() => {
-    boundingBox.current[0] = minX - n;
-    boundingBox.current[1] = minY - n;
-    boundingBox.current[2] = maxX + n;
-    boundingBox.current[3] = maxY + n;
+    boundingBox.current[0] = minX - GRID_CANVAS_BOUND;
+    boundingBox.current[1] = minY - GRID_CANVAS_BOUND;
+    boundingBox.current[2] = maxX + GRID_CANVAS_BOUND;
+    boundingBox.current[3] = maxY + GRID_CANVAS_BOUND;
   }, [minX, minY, maxX, maxY]); // needed for later when they refer to actual data
 
   // hybrid reactive/imperative
