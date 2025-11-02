@@ -78,19 +78,55 @@ export const useGridCanvasStore = create<GridCanvasState>()(
       },
 
       zoomCanvas: (d: number, mousePos: { x: number; y: number }) => {
-        const transform = get().transform;
+        const {
+          private: { canvasSize },
+          transform,
+        } = get();
 
         const oldZoom = transform.scale.x;
         const newZoom = Math.min(Math.max(oldZoom - d, 0.1), 16.0);
+        if (newZoom === oldZoom) return;
 
-        const translatedMouseX = (mousePos.x - transform.position.x) / oldZoom;
-        const translatedMouseY = (mousePos.y - transform.position.y) / oldZoom;
+        // Anchor zoom to cursor
+        const worldMouseX = (mousePos.x - transform.position.x) / oldZoom;
+        const worldMouseY = (mousePos.y - transform.position.y) / oldZoom;
 
-        transform.position.set(
-          mousePos.x - translatedMouseX * newZoom,
-          mousePos.y - translatedMouseY * newZoom
+        let tx = mousePos.x - worldMouseX * newZoom;
+        let ty = mousePos.y - worldMouseY * newZoom;
+
+        // Same bounds as scrollCanvas
+        const leftMostX = 0;
+        const topMostY = 0;
+        const rightMostX = 0;
+        const bottomMostY = 0;
+
+        const minX = leftMostX - GRID_CANVAS_BOUND;
+        const minY = topMostY - GRID_CANVAS_BOUND;
+        const maxX = rightMostX + GRID_CANVAS_BOUND;
+        const maxY = bottomMostY + GRID_CANVAS_BOUND;
+
+        const [canvasWidth, canvasHeight] = canvasSize;
+
+        // Clamp to bounds (auto-centers when content fits the viewport)
+        tx = clampPanAxis(
+          tx,
+          newZoom,
+          minX,
+          maxX,
+          canvasWidth,
+          BOUNDARY_BUFFER_PX * newZoom
         );
 
+        ty = clampPanAxis(
+          ty,
+          newZoom,
+          minY,
+          maxY,
+          canvasHeight,
+          BOUNDARY_BUFFER_PX * newZoom
+        );
+
+        transform.position.set(tx, ty);
         transform.scale.set(newZoom, newZoom);
       },
 

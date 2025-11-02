@@ -59,18 +59,6 @@ export default memo(function GridCanvas() {
     };
   }, [setCanvasSize, setIsFocused]);
 
-  // on mount/unmount
-  // useEffect(() => {
-  //   setCanvasSize([
-  //     window.innerWidth,
-  //     window.innerHeight - 50, // TODO: derive a const
-  //   ]);
-
-  //   return () => {
-  //     setIsFocused(false);
-  //   };
-  // }, []);
-
   const handleResize = (_: UIEvent | undefined) => {
     setOpacity(0);
 
@@ -97,6 +85,16 @@ export default memo(function GridCanvas() {
     return () => {
       cancelAnimationFrame(raf);
       removeEventListener('resize', listener);
+    };
+  }, []);
+
+  useEffect(() => {
+    // refer to tailwind.config.ts for the css
+    document.documentElement.classList.add('canvas-mode');
+    document.body.classList.add('canvas-mode');
+    return () => {
+      document.documentElement.classList.remove('canvas-mode');
+      document.body.classList.remove('canvas-mode');
     };
   }, []);
 

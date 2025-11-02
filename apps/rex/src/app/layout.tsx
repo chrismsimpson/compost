@@ -1,6 +1,6 @@
 import '~/styles/globals.css';
 
-import { cn } from './lib/cn';
+import { cn } from '~/app/lib/cn';
 
 export default async function RootLayout({
   children,

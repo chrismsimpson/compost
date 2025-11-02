@@ -3,6 +3,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { CanvasZoom } from '~/app/_components/gridCanvas/zoom/canvasZoom';
+import { CanvasToolbar } from '~/app/_components/gridCanvas/toolbar/canvasToolbar';
 
 const GridCanvas = dynamic(
   () => import('~/app/_components/gridCanvas/gridCanvas'),
@@ -21,6 +23,8 @@ export default function Page() {
         <div className="flex-1">
           <div className="relative h-full">
             <GridCanvas />
+            <CanvasZoom />
+            <CanvasToolbar />
           </div>
         </div>
       </div>
