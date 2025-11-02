@@ -54,14 +54,14 @@ void main() {
 
   // dots - use pythagoras to position the dot in the top-left of the cell
   // this keeps dots in the same position when jumping between zoom steps
-  float dotRadius = 1.6 * (1. + (max(0., scale.x - 2.)));
+  float dotRadius = 1.125 * (1.0 + (max(0.0, scale.x - 2.0)));
   float dotOffset = sqrt(pow(dotRadius, 2.) * 2.) / sqrt(pow(gridSpacing * scale.x, 2.) * 2.);
   vec2 dotCenter = (mod(pos, gridSpacing) - (dotOffset * gridSpacing)) * scale.x;
   float opacity = (1. - (max(0., 0.4 - scale.x) * 3.));
 
   gl_FragColor = mix(gl_FragColor,
     vec4(vec3(221.,220.,219.)/255.,1.), 
-    smoothstep(dotRadius,dotRadius * .8,length(dotCenter)) * opacity);
+    smoothstep(dotRadius, dotRadius * .99,length(dotCenter)) * opacity);
 
   // boundary size
   vec2 size = boundingBox.ba - boundingBox.xy;

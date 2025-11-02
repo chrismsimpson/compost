@@ -3,9 +3,7 @@ const require = createRequire(import.meta.url);
 
 /** @type {import('next').NextConfig} */
 
-const remotePatterns = [
-  
-];
+const remotePatterns = [];
 
 if (process.env.FILE_PROVIDER === 'local') {
   remotePatterns.push({
@@ -20,7 +18,7 @@ const config = {
   reactStrictMode: true,
   output: 'standalone',
   images: {
-    remotePatterns
+    remotePatterns,
   },
   serverExternalPackages: ['@electric-sql/pglite'],
   webpack(config) {
@@ -34,6 +32,7 @@ const config = {
     };
     return config;
   },
+  devIndicators: false,
 };
 
 export default config;
