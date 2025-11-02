@@ -5,14 +5,26 @@ import { useEffect, useRef } from 'react';
 import { Euler, OrthographicCamera, PerspectiveCamera, Vector3 } from 'three';
 import { useCameraStore } from '~/app/three/cameraStore';
 
-export function FPSControls({ position, rotation, fov, zoom }: { position?: number[]; rotation?: { x: number; y: number; z: number }, fov?: number; zoom?: number }) {
+export function FPSControls({
+  position,
+  rotation,
+  fov,
+  zoom,
+}: {
+  position?: number[];
+  rotation?: { x: number; y: number; z: number };
+  fov?: number;
+  zoom?: number;
+}) {
   const { camera, gl } = useThree();
 
   const isDown = useRef(false);
   const keysRef = useRef<Record<string, boolean>>({});
   const yawRef = useRef(0);
   const pitchRef = useRef(0);
-  const eulerRef = useRef(new Euler(position?.[0] ?? 0, position?.[1] ?? 0, position?.[2] ?? 0, 'YXZ'));
+  const eulerRef = useRef(
+    new Euler(position?.[0] ?? 0, position?.[1] ?? 0, position?.[2] ?? 0, 'YXZ')
+  );
   const forwardRef = useRef(new Vector3());
   const rightRef = useRef(new Vector3());
   const UP = useRef(new Vector3(0, 1, 0));
@@ -26,7 +38,12 @@ export function FPSControls({ position, rotation, fov, zoom }: { position?: numb
     inited: boolean;
   }>({
     pos: new Vector3(),
-    rot: new Euler(position?.[0] ?? 0, position?.[1] ?? 0, position?.[2] ?? 0, 'YXZ'),
+    rot: new Euler(
+      position?.[0] ?? 0,
+      position?.[1] ?? 0,
+      position?.[2] ?? 0,
+      'YXZ'
+    ),
     fov: 0,
     zoom: 0,
     inited: false,
@@ -39,7 +56,6 @@ export function FPSControls({ position, rotation, fov, zoom }: { position?: numb
 
   // Small helpers for logging
   const logCamera = (reason: string) => {
-
     const pos = [
       +camera.position.x.toFixed(3),
       +camera.position.y.toFixed(3),
@@ -52,21 +68,15 @@ export function FPSControls({ position, rotation, fov, zoom }: { position?: numb
       z: +camera.rotation.z.toFixed(3),
     };
 
-    const fov = camera instanceof PerspectiveCamera
-      ? +camera.fov.toFixed(2)
-      : undefined;
-        
-    const zoom = camera instanceof OrthographicCamera
-      ? +camera.zoom.toFixed(2)
-      : undefined;
-    
-    useCameraStore.getState().setCamera(
-      reason,
-      pos,
-      rotation,
-      fov,
-      zoom
-    );
+    const fov =
+      camera instanceof PerspectiveCamera ? +camera.fov.toFixed(2) : undefined;
+
+    const zoom =
+      camera instanceof OrthographicCamera
+        ? +camera.zoom.toFixed(2)
+        : undefined;
+
+    useCameraStore.getState().setCamera(reason, pos, rotation, fov, zoom);
   };
 
   const snapshot = () => {
@@ -111,7 +121,8 @@ export function FPSControls({ position, rotation, fov, zoom }: { position?: numb
     // Seed yaw/pitch from the current camera quaternion
 
     if (position && position.length === 3) {
-      camera.position.set(position[0], position[1], position[2]);
+      // biome-ignore lint/style/noNonNullAssertion: we just checked length
+      camera.position.set(position[0]!, position[1]!, position[2]!);
     }
 
     if (rotation) {
@@ -120,7 +131,10 @@ export function FPSControls({ position, rotation, fov, zoom }: { position?: numb
       pitchRef.current = rotation.x;
     } else {
       // Seed yaw/pitch from current orientation and look at origin
-      const e = new Euler(0, 0, 0, 'YXZ').setFromQuaternion(camera.quaternion, 'YXZ');
+      const e = new Euler(0, 0, 0, 'YXZ').setFromQuaternion(
+        camera.quaternion,
+        'YXZ'
+      );
       yawRef.current = e.y;
       pitchRef.current = e.x;
       camera.lookAt(0, 0, 0);
@@ -134,7 +148,7 @@ export function FPSControls({ position, rotation, fov, zoom }: { position?: numb
       camera.zoom = zoom;
       camera.updateProjectionMatrix();
     }
-    
+
     logCamera('start');
     snapshot();
 
@@ -180,14 +194,24 @@ export function FPSControls({ position, rotation, fov, zoom }: { position?: numb
 
     const onKeyDown = (event: KeyboardEvent) => {
       const { code } = event;
-      if (code === 'KeyW' || code === 'KeyA' || code === 'KeyS' || code === 'KeyD') {
+      if (
+        code === 'KeyW' ||
+        code === 'KeyA' ||
+        code === 'KeyS' ||
+        code === 'KeyD'
+      ) {
         keysRef.current[code] = true;
       }
     };
 
     const onKeyUp = (event: KeyboardEvent) => {
       const { code } = event;
-      if (code === 'KeyW' || code === 'KeyA' || code === 'KeyS' || code === 'KeyD') {
+      if (
+        code === 'KeyW' ||
+        code === 'KeyA' ||
+        code === 'KeyS' ||
+        code === 'KeyD'
+      ) {
         keysRef.current[code] = false;
       }
     };
@@ -226,16 +250,16 @@ export function FPSControls({ position, rotation, fov, zoom }: { position?: numb
 
     const distance = moveSpeed * delta;
 
-    if (keysRef.current['KeyW']) {
+    if (keysRef.current.KeyW) {
       camera.position.addScaledVector(forwardRef.current, distance);
     }
-    if (keysRef.current['KeyS']) {
+    if (keysRef.current.KeyS) {
       camera.position.addScaledVector(forwardRef.current, -distance);
     }
-    if (keysRef.current['KeyA']) {
+    if (keysRef.current.KeyA) {
       camera.position.addScaledVector(rightRef.current, -distance);
     }
-    if (keysRef.current['KeyD']) {
+    if (keysRef.current.KeyD) {
       camera.position.addScaledVector(rightRef.current, distance);
     }
 

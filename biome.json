@@ -1,20 +1,23 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.5/schema.json",
   "files": {
-    "ignore": [
-      "./.turbo/**/*",
-      "./apps/**/.next/**/*",
-      "./apps/**/.turbo/**/*",
-      "./apps/**/.vscode/**/*",
-      "./apps/**/coverage/**/*",
-      "./apps/**/node_modules/**/*",
-      "./apps/**/tailwind.config.ts",
-      "./apps/**/vitest.config.ts",
-      "./apps/**/*prompt_config*.json",
-      "./packages/database/drizzle/**",
-      "./packages/email/.react-email/**/*",
-      "./packages/tsconfig/**/*",
-      "**/*.d.ts"
+    "includes": [
+      "**",
+
+      "!!/**/.turbo",
+      "!!/**/.next",
+      "!!/**/.vscode",
+      "!!/**/coverage",
+
+      "!apps/**/tailwind.config.ts",
+      "!apps/**/vitest.config.ts",
+      "!apps/**/*prompt_config*.json",
+
+      "!packages/database/drizzle",
+      "!packages/email/.react-email",
+      "!packages/tsconfig",
+
+      "!/**/*.d.ts"
     ],
     "ignoreUnknown": false
   },
@@ -37,6 +40,13 @@
       "trailingCommas": "es5"
     },
     "jsxRuntime": "reactClassic"
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
+    }
   },
   "linter": {
     "enabled": true,
@@ -86,9 +96,6 @@
       "recommended": true
     }
   },
-  "organizeImports": {
-    "enabled": false
-  },
   "vcs": {
     "clientKind": "git",
     "enabled": false,
@@ -96,10 +103,7 @@
   },
   "overrides": [
     {
-      "include": [
-        "apps/**/src/**/*.test.ts",
-        "apps/**/src/**/*.spec.ts"
-      ],
+      "includes": ["apps/**/src/**/*.test.ts", "apps/**/src/**/*.spec.ts"],
       "linter": {
         "rules": {
           "suspicious": {

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "dist",
+    "target": "ES2022"
+  },
+  "exclude": ["dist", "node_modules"],
+  "extends": "@compost/tsconfig/base.json",
+  "include": ["**/*.ts", "**/*.tsx", "drizzle.config.ts"]
+}
