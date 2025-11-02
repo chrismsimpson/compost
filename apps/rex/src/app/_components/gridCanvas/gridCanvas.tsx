@@ -1,10 +1,25 @@
 'use client';
 
-import { memo, useRef, useEffect, useState } from 'react';
+import {
+  memo,
+  useRef,
+  useEffect,
+  useState,
+  useLayoutEffect,
+  type WheelEvent,
+} from 'react';
 import { Application, extend } from '@pixi/react';
 import { useGridCanvasStore } from '~/app/stores/useGridCanvasStore';
 import { DotGrid } from '~/app/_components/gridCanvas/dotGrid/dotGrid';
-import { Matrix, type Geometry, Mesh, type Shader } from 'pixi.js';
+import {
+  Matrix,
+  type Geometry,
+  Mesh,
+  type Shader,
+  type Application as PixiApp,
+} from 'pixi.js';
+
+extend({ Mesh });
 
 export default memo(function GridCanvas() {
   const canvasSize = useGridCanvasStore(state => state.private.canvasSize);
@@ -14,6 +29,12 @@ export default memo(function GridCanvas() {
 
   const setIsFocused = useGridCanvasStore(state => state.setIsFocused);
 
+  const zoomCanvas = useGridCanvasStore(state => state.zoomCanvas);
+
+  const scrollCanvas = useGridCanvasStore(state => state.scrollCanvas);
+
+  const appRef = useRef<PixiApp | null>(null);
+
   const ref = useRef<HTMLDivElement>(null);
   const dotGridRef = useRef<Mesh<Geometry, Shader>>(null);
 
@@ -21,17 +42,34 @@ export default memo(function GridCanvas() {
 
   const [opacity, setOpacity] = useState(1);
 
-  // on mount/unmount
-  useEffect(() => {
-    setCanvasSize([
-      window.innerWidth,
-      window.innerHeight - 50, // TODO: derive a const
-    ]);
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (ref.current) {
+        const { width, height } = ref.current.getBoundingClientRect();
+        setCanvasSize([width, height]);
+      } else {
+        setCanvasSize([window.innerWidth, window.innerHeight - 50]); // TODO: derive a const
+      }
+    };
+
+    measure();
 
     return () => {
       setIsFocused(false);
     };
-  }, []);
+  }, [setCanvasSize, setIsFocused]);
+
+  // on mount/unmount
+  // useEffect(() => {
+  //   setCanvasSize([
+  //     window.innerWidth,
+  //     window.innerHeight - 50, // TODO: derive a const
+  //   ]);
+
+  //   return () => {
+  //     setIsFocused(false);
+  //   };
+  // }, []);
 
   const handleResize = (_: UIEvent | undefined) => {
     setOpacity(0);
@@ -51,15 +89,16 @@ export default memo(function GridCanvas() {
     }, 50);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: ¯\_(ツ)_/¯
   useEffect(() => {
-    addEventListener('resize', handleResize);
-
+    const listener = (e?: UIEvent) => handleResize(e);
+    const raf = requestAnimationFrame(() => handleResize(undefined));
+    addEventListener('resize', listener);
     return () => {
-      removeEventListener('resize', handleResize);
+      cancelAnimationFrame(raf);
+      removeEventListener('resize', listener);
     };
-  });
-
-  extend({ Mesh });
+  }, []);
 
   return (
     <div
@@ -69,8 +108,40 @@ export default memo(function GridCanvas() {
         position: 'relative',
         opacity,
       }}
+      onWheel={(e: WheelEvent<Element>) => {
+        e.preventDefault();
+
+        const isModifier = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent)
+          ? e.metaKey
+          : e.ctrlKey;
+
+        if (isModifier) {
+          const bb = e.currentTarget.getBoundingClientRect();
+
+          const mousePos = { x: e.pageX - bb.left, y: e.pageY - bb.top };
+
+          zoomCanvas((e.deltaY / 1000.0) * transform.scale.x, mousePos);
+        } else {
+          scrollCanvas(-e.deltaX, -e.deltaY);
+        }
+      }}
     >
-      <Application width={canvasSize[0]} height={canvasSize[1]}>
+      <Application
+        eventMode="passive"
+        backgroundColor={0xeef1f5}
+        antialias={false}
+        autoDensity={true}
+        resizeTo={ref}
+        preference="webgl"
+        powerPreference="high-performance"
+        resolution={window.devicePixelRatio}
+        className="absolute"
+        width={canvasSize[0]}
+        height={canvasSize[1]}
+        onInit={(app: PixiApp) => {
+          appRef.current = app;
+        }}
+      >
         <DotGrid
           ref={dotGridRef}
           canvasRef={ref}
