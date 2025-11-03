@@ -32,7 +32,7 @@ export const CanvasToolbar = () => {
           >
             <MousePointer2Icon
               className={cn('size-4 stroke-zinc-900', {
-                'stroke-neutral-400 group-hover:stroke-neutral-300':
+                'stroke-neutral-300 group-hover:stroke-neutral-200':
                   cursorMode === 'select',
               })}
             />

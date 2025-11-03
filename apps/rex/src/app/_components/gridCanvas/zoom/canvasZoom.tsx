@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { cn } from '~/app/lib/cn';
 import { useGridCanvasStore } from '~/app/stores/useGridCanvasStore';
 import {
@@ -12,27 +11,12 @@ import { Toggle } from '~/app/_components/shadcn/toggle';
 import { MinusIcon, PlusIcon } from 'lucide-react';
 
 export const CanvasZoom = () => {
-  const transform = useGridCanvasStore(s => s.transform);
-  const [zoomLevel, setZoomLevel] = useState(() => transform.scale.x);
+  const zoom = useGridCanvasStore(s => s.zoom);
 
-  useEffect(() => {
-    let raf = 0;
-    let last = transform.scale.x;
+  const zoomIn = useGridCanvasStore(state => state.zoomIn);
+  const zoomOut = useGridCanvasStore(state => state.zoomOut);
 
-    const tick = () => {
-      const current = transform.scale.x;
-      if (current !== last) {
-        last = current;
-        setZoomLevel(current);
-      }
-      raf = requestAnimationFrame(tick);
-    };
-
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [transform]);
-
-  const zoomPercent = (zoomLevel * 100).toFixed(0);
+  const zoomPercent = (zoom * 100).toFixed(0);
 
   return (
     <div
@@ -45,7 +29,7 @@ export const CanvasZoom = () => {
           <Toggle
             className={cn('group select-none border-0')}
             variant="default"
-            onClick={() => {}}
+            onClick={() => zoomOut()}
           >
             <MinusIcon className={cn('size-4 stroke-zinc-900')} />
           </Toggle>
@@ -62,7 +46,7 @@ export const CanvasZoom = () => {
           <Toggle
             className={cn('group select-none border-0')}
             variant="default"
-            onClick={() => {}}
+            onClick={() => zoomIn()}
           >
             <PlusIcon className={cn('size-4 stroke-zinc-900')} />
           </Toggle>

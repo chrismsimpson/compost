@@ -9,7 +9,7 @@ const config = {
   ],
   prefix: '',
   theme: {
-    containter: {
+    container: {
       center: true,
       padding: '2rem',
       screens: {

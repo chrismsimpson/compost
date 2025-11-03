@@ -1,4 +1,4 @@
-import { type Ref, useMemo, memo, useRef, useEffect } from 'react';
+import { type Ref, useMemo, memo, useRef, useEffect, forwardRef } from 'react';
 import {
   type FederatedPointerEvent,
   type Geometry,
@@ -19,75 +19,79 @@ interface DotGridProps {
   height: number;
   transform: Transform;
   canvasRef: Ref<HTMLDivElement>;
-  ref: Ref<Mesh<Geometry, Shader>>;
+  // ref: Ref<Mesh<Geometry, Shader>>;
 }
 
-export const DotGrid = memo(function DotGrid(props: DotGridProps) {
-  const { width, height, transform, canvasRef, ref } = props;
+export const DotGrid = memo(
+  forwardRef<Mesh<Geometry, Shader>, DotGridProps>(
+    function DotGrid(props, ref) {
+      const { width, height, transform, canvasRef } = props;
 
-  const canvasSize = useGridCanvasStore(state => state.private.canvasSize);
+      const canvasSize = useGridCanvasStore(state => state.private.canvasSize);
 
-  const selectionBox = useGridCanvasStore(state => state.selectionBox);
+      const selectionBox = useGridCanvasStore(state => state.selectionBox);
 
-  // TODO: come back and make these real
-  const minX = 0;
-  const minY = 0;
-  const maxX = 0;
-  const maxY = 0;
+      // TODO: come back and make these real
+      const minX = 0;
+      const minY = 0;
+      const maxX = 0;
+      const maxY = 0;
 
-  const boundingBox = useRef([minX, minY, maxX, maxY]);
+      const boundingBox = useRef([minX, minY, maxX, maxY]);
 
-  useEffect(() => {
-    boundingBox.current[0] = minX - GRID_CANVAS_BOUND;
-    boundingBox.current[1] = minY - GRID_CANVAS_BOUND;
-    boundingBox.current[2] = maxX + GRID_CANVAS_BOUND;
-    boundingBox.current[3] = maxY + GRID_CANVAS_BOUND;
-  }, [minX, minY, maxX, maxY]); // needed for later when they refer to actual data
+      useEffect(() => {
+        boundingBox.current[0] = minX - GRID_CANVAS_BOUND;
+        boundingBox.current[1] = minY - GRID_CANVAS_BOUND;
+        boundingBox.current[2] = maxX + GRID_CANVAS_BOUND;
+        boundingBox.current[3] = maxY + GRID_CANVAS_BOUND;
+      }, [minX, minY, maxX, maxY]); // needed for later when they refer to actual data
 
-  // hybrid reactive/imperative
-  const uniforms = useMemo(
-    () =>
-      new UniformGroup({
-        translate: { value: transform.position, type: 'vec2<f32>' },
-        scale: { value: transform.scale, type: 'vec2<f32>' },
-        pixelRatio: { value: window.devicePixelRatio, type: 'f32' },
-        boundingBox: { value: boundingBox.current, type: 'vec4<f32>' },
-        canvasSize: { value: canvasSize, type: 'vec2<f32>' },
-        selectionBox: { value: selectionBox.state, type: 'vec4<f32>' },
-      }),
-    [
-      transform.position,
-      transform.scale,
-      boundingBox.current,
-      canvasSize,
-      selectionBox.state,
-    ]
-  );
+      // hybrid reactive/imperative
+      const uniforms = useMemo(
+        () =>
+          new UniformGroup({
+            translate: { value: transform.position, type: 'vec2<f32>' },
+            scale: { value: transform.scale, type: 'vec2<f32>' },
+            pixelRatio: { value: window.devicePixelRatio, type: 'f32' },
+            boundingBox: { value: boundingBox.current, type: 'vec4<f32>' },
+            canvasSize: { value: canvasSize, type: 'vec2<f32>' },
+            selectionBox: { value: selectionBox.state, type: 'vec4<f32>' },
+          }),
+        [
+          transform.position,
+          transform.scale,
+          boundingBox.current,
+          canvasSize,
+          selectionBox.state,
+        ]
+      );
 
-  const dotGridShader = useMemo(
-    () =>
-      new Shader({
-        glProgram: dotGridProgram,
-        resources: { uniforms },
-      }),
-    [uniforms]
-  );
+      const dotGridShader = useMemo(
+        () =>
+          new Shader({
+            glProgram: dotGridProgram,
+            resources: { uniforms },
+          }),
+        [uniforms]
+      );
 
-  return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: ¯\_(ツ)_/¯
-    <pixiMesh
-      ref={ref}
-      geometry={cardGeometry}
-      scale={{ x: width, y: height }}
-      // @ts-expect-error this should work
-      shader={dotGridShader}
-      visible={true}
-      eventMode="static"
-      interactiveChildren={false}
-      onClick={(e: FederatedPointerEvent) => {}}
-      onPointerDown={(e: FederatedPointerEvent) => {}}
-      onPointerOver={() => {}}
-      onPointerUp={(e: FederatedPointerEvent) => {}}
-    />
-  );
-});
+      return (
+        // biome-ignore lint/a11y/noStaticElementInteractions: ¯\_(ツ)_/¯
+        <pixiMesh
+          ref={ref}
+          geometry={cardGeometry}
+          scale={{ x: width, y: height }}
+          // @ts-expect-error ¯\_(ツ)_/¯
+          shader={dotGridShader}
+          visible={true}
+          eventMode="static"
+          interactiveChildren={false}
+          onClick={(e: FederatedPointerEvent) => {}}
+          onPointerDown={(e: FederatedPointerEvent) => {}}
+          onPointerOver={() => {}}
+          onPointerUp={(e: FederatedPointerEvent) => {}}
+        />
+      );
+    }
+  )
+);
