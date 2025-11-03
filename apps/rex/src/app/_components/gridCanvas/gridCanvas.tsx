@@ -18,10 +18,14 @@ import {
   type Shader,
   type Application as PixiApp,
 } from 'pixi.js';
+import { useTheme } from 'next-themes';
 
 extend({ Mesh });
 
 export default memo(function GridCanvas() {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
   const canvasSize = useGridCanvasStore(state => state.private.canvasSize);
   const setCanvasSize = useGridCanvasStore(state => state.setCanvasSize);
 
@@ -142,10 +146,11 @@ export default memo(function GridCanvas() {
       >
         <DotGrid
           ref={dotGridRef}
-          canvasRef={ref}
+          isDark={isDark}
           width={canvasSize[0]}
           height={canvasSize[1]}
           transform={transform}
+          canvasRef={ref}
         />
       </Application>
     </div>

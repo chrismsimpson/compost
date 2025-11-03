@@ -15,17 +15,17 @@ import {
 import { cardGeometry } from '~/app/_components/gridCanvas/card/card.geometry';
 
 interface DotGridProps {
+  isDark: boolean;
   width: number;
   height: number;
   transform: Transform;
   canvasRef: Ref<HTMLDivElement>;
-  // ref: Ref<Mesh<Geometry, Shader>>;
 }
 
 export const DotGrid = memo(
   forwardRef<Mesh<Geometry, Shader>, DotGridProps>(
     function DotGrid(props, ref) {
-      const { width, height, transform, canvasRef } = props;
+      const { isDark, width, height, transform, canvasRef } = props;
 
       const canvasSize = useGridCanvasStore(state => state.private.canvasSize);
 
@@ -56,6 +56,7 @@ export const DotGrid = memo(
             boundingBox: { value: boundingBox.current, type: 'vec4<f32>' },
             canvasSize: { value: canvasSize, type: 'vec2<f32>' },
             selectionBox: { value: selectionBox.state, type: 'vec4<f32>' },
+            isDark: { value: isDark ? 1.0 : 0.0, type: 'f32' },
           }),
         [
           transform.position,

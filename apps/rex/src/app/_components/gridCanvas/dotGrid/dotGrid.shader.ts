@@ -29,6 +29,7 @@ uniform vec2 scale;
 uniform float pixelRatio;
 uniform vec4 boundingBox;
 uniform vec4 selectionBox;
+uniform float isDark;
 
 // from Inigo Quilez
 float sdBox(vec2 p, vec2 b) {

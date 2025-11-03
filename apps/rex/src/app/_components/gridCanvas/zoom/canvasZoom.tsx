@@ -21,7 +21,7 @@ export const CanvasZoom = () => {
   return (
     <div
       className={cn(
-        'z-canvas-toolbar fixed top-4 right-4 bg-white shadow-lg rounded-md border border-gray-200 flex items-center justify-center p-2 gap-1'
+        'z-canvas-toolbar fixed top-[66px] right-4 bg-neutral-50 shadow-lg rounded-md border border-gray-200 flex items-center justify-center p-2 gap-1'
       )}
     >
       <Tooltip>
