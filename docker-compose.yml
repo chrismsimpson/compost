@@ -1,0 +1,13 @@
+services:
+  database:
+    image: postgres:16.2-alpine3.19
+    restart: unless-stopped
+    environment:
+      PGDATA: /data/postgres
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: passwd
+      POSTGRES_DB: compost
+    volumes:
+      - ./local-data/postgres:/data/postgres
+    ports:
+      - "5432:5432"

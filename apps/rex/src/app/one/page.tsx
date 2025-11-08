@@ -9,7 +9,9 @@ import { CanvasToolbar } from '~/app/_components/gridCanvas/toolbar/canvasToolba
 const GridCanvas = dynamic(
   () => import('~/app/_components/gridCanvas/gridCanvas'),
   {
-    loading: () => <div className="w-full h-full bg-amber-300">Loading...</div>,
+    loading: () => (
+      <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800" />
+    ),
     ssr: false,
   }
 );

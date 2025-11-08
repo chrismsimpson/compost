@@ -1,5 +1,6 @@
 import { Header } from '~/app/one/header';
 import { ThemeProvider } from '~/app/_components/theme/themeProvider';
+import { TooltipProvider } from '~/app/_components/shadcn/tooltip';
 
 export default async function PageLayout({
   children,
@@ -13,8 +14,10 @@ export default async function PageLayout({
       enableSystem
       disableTransitionOnChange
     >
-      <Header />
-      {children}
+      <TooltipProvider>
+        <Header />
+        {children}
+      </TooltipProvider>
     </ThemeProvider>
   );
 }

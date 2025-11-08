@@ -21,7 +21,7 @@ export const CanvasZoom = () => {
   return (
     <div
       className={cn(
-        'z-canvas-toolbar fixed top-[66px] right-4 bg-neutral-50 shadow-lg rounded-md border border-gray-200 flex items-center justify-center p-2 gap-1'
+        'z-canvas-toolbar fixed top-[66px] right-4 shadow-lg rounded-md border flex items-center justify-center p-2 gap-1 bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-900'
       )}
     >
       <Tooltip>
@@ -31,13 +31,17 @@ export const CanvasZoom = () => {
             variant="default"
             onClick={() => zoomOut()}
           >
-            <MinusIcon className={cn('size-4 stroke-zinc-900')} />
+            <MinusIcon
+              className={cn(
+                'size-4 stroke-neutral-900 dark:stroke-neutral-400 dark:group-hover:stroke-neutral-300'
+              )}
+            />
           </Toggle>
         </TooltipTrigger>
         <TooltipContent>Zoom Out</TooltipContent>
       </Tooltip>
 
-      <span className="font-medium text-gray-600 w-16 text-center">
+      <span className="font-medium text-neutral-600 w-16 text-center dark:text-neutral-400">
         {zoomPercent}%
       </span>
 
@@ -48,7 +52,11 @@ export const CanvasZoom = () => {
             variant="default"
             onClick={() => zoomIn()}
           >
-            <PlusIcon className={cn('size-4 stroke-zinc-900')} />
+            <PlusIcon
+              className={cn(
+                'size-4 stroke-neutral-900 dark:stroke-neutral-400 dark:group-hover:stroke-neutral-300'
+              )}
+            />
           </Toggle>
         </TooltipTrigger>
         <TooltipContent>Zoom In</TooltipContent>

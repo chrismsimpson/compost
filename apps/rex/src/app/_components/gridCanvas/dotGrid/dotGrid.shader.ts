@@ -51,7 +51,10 @@ void main() {
   float gridSpacing = 120. * gridSpacingScalar;
 
   // base white colour
-  gl_FragColor = vec4(vec3(249.)/255.,1.);
+  vec3 bgLight = vec3(250.)/255.;
+  // vec3 bgDark = vec3(64.)/255.;
+  vec3 bgDark = vec3(51.)/255.;
+  gl_FragColor = vec4(mix(bgLight, bgDark, isDark), 1.);
 
   // dots - use pythagoras to position the dot in the top-left of the cell
   // this keeps dots in the same position when jumping between zoom steps
@@ -60,8 +63,10 @@ void main() {
   vec2 dotCenter = (mod(pos, gridSpacing) - (dotOffset * gridSpacing)) * scale.x;
   float opacity = (1. - (max(0., 0.4 - scale.x) * 3.));
 
+  vec3 dotLight = vec3(212.)/255.;
+  vec3 dotDark = vec3(23.)/255.;
   gl_FragColor = mix(gl_FragColor,
-    vec4(vec3(221.,220.,219.)/255.,1.), 
+    vec4(mix(dotLight, dotDark, isDark), 1.),
     smoothstep(dotRadius, dotRadius * .99,length(dotCenter)) * opacity);
 
   // boundary size
@@ -73,20 +78,26 @@ void main() {
   float box = sdBoxTL(pos-boundingBox.xy, size) - 10.;
 
   // draw bg
+  vec3 outerLight = vec3(245.)/255.;
+  vec3 outerDark = vec3(38.)/255.;
   gl_FragColor = mix(gl_FragColor, 
-    vec4(vec3(245.)/255.,1.), 
+    vec4(mix(outerLight, outerDark, isDark), 1.),
     smoothstep(-0.,0.01, box));
 
   // draw boundary shadow
+  vec3 shadLight = vec3(240.)/255.;
+  vec3 shadDark = vec3(34.)/255.;
   gl_FragColor = mix(gl_FragColor, 
-    vec4(vec3(240.)/255.,1.), 
+    vec4(mix(shadLight, shadDark, isDark), 1.),
     smoothstep(-0.,0.01, box) *
     smoothstep(8./scale.x,0., box) 
   );
 
   // stroke
+  vec3 strokeLight = vec3(229.)/255.;
+  vec3 strokeDark = vec3(23.)/255.;
   gl_FragColor = mix(gl_FragColor, 
-    vec4(vec3(234.,233.,232.)/255.,1.), 
+    vec4(mix(strokeLight, strokeDark, isDark),1.),
     smoothstep(-0.,.1, box) *
     smoothstep(0.,-.1, box - strokeThickness)
   );
