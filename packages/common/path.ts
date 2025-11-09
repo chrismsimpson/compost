@@ -1,9 +1,7 @@
 import {
-  isDigit,
   type Lexer,
   lexerIsEof,
   lexerPeek,
-  lexerMatch,
   type Source,
   type Parser,
   parserIsEof,
@@ -16,13 +14,9 @@ type PathToken = {
   value?: string | null;
 };
 
-export const isPathSignificand = (c: string): boolean => {
-  return isDigit(c) || c === 'e' || c === 'E' || c === '-';
-};
+const numberRe = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?/;
 
 const lexPathToken = (lexer: Lexer): PathToken | Error => {
-  // let err: Error | null = null;
-
   while (!lexerIsEof(lexer)) {
     const peek = lexerPeek(lexer);
 
@@ -64,7 +58,9 @@ const lexPathToken = (lexer: Lexer): PathToken | Error => {
 
       // numbers
 
+      case '+':
       case '-':
+      case '.':
       case '0':
       case '1':
       case '2':
@@ -75,37 +71,14 @@ const lexPathToken = (lexer: Lexer): PathToken | Error => {
       case '7':
       case '8':
       case '9': {
-        const isNumber =
-          (peek === '-' && lexerMatch(lexer, isDigit, 1)) || isDigit(peek);
+        const rest = lexer.source.contents.slice(lexer.position);
 
-        if (isNumber) {
-          const start = lexer.position;
+        const match = rest.match(numberRe);
 
-          while (!lexerIsEof(lexer)) {
-            lexer.position += 1;
+        if (match && match[0].length > 0) {
+          lexer.position += match[0].length;
 
-            if (lexerIsEof(lexer)) {
-              break;
-            }
-
-            if (
-              lexerMatch(lexer, '.') &&
-              !lexerMatch(lexer, isPathSignificand, 1)
-            ) {
-              break;
-            }
-
-            if (
-              !lexerMatch(lexer, '.') &&
-              !lexerMatch(lexer, isPathSignificand)
-            ) {
-              break;
-            }
-          }
-
-          const source = lexer.source.contents.slice(start, lexer.position);
-
-          return { kind: 'number', value: source };
+          return { kind: 'number', value: match[0] };
         }
 
         unknown = true;
@@ -209,6 +182,15 @@ export type PathCommand = {
   arcs?: EllipticalArcComponents[] | null;
 };
 
+const skipCommas = (parser: Parser<PathToken>) => {
+  while (
+    !parserIsEof(parser) &&
+    parser.tokens[parser.position]?.kind === 'comma'
+  ) {
+    parser.position += 1;
+  }
+};
+
 // path parsing
 
 const parsePathCommandPoint = (
@@ -283,17 +265,13 @@ const parsePathCommandPoints = (
   const points: PathPoint[] = [];
 
   while (!parserIsEof(parser)) {
+    skipCommas(parser);
+
     const peek = parser.tokens[parser.position];
 
-    if (
-      peek?.kind === 'command' ||
-      peek?.kind === 'comma' ||
-      peek?.kind === 'eof'
-    ) {
+    if (peek?.kind === 'command' || peek?.kind === 'eof') {
       break;
     }
-
-    ///
 
     const point = parsePathCommandPoint(parser);
 
@@ -302,6 +280,8 @@ const parsePathCommandPoints = (
     }
 
     points.push(point);
+
+    skipCommas(parser);
   }
 
   ///
@@ -320,30 +300,26 @@ const parsePathCommandNumbers = (
 
   const numbers: number[] = [];
 
-  ///
-
   while (!parserIsEof(parser)) {
+    skipCommas(parser);
+
     const peek = parser.tokens[parser.position];
 
-    if (
-      peek?.kind === 'command' ||
-      peek?.kind === 'comma' ||
-      peek?.kind === 'eof'
-    ) {
+    if (peek?.kind === 'command' || peek?.kind === 'eof') {
       break;
     }
 
-    ///
+    const numberTok = parser.tokens[parser.position];
 
-    const number = parser.tokens[parser.position];
-
-    if (number?.kind !== 'number') {
+    if (numberTok?.kind !== 'number') {
       return new Error('expected number');
     }
 
     parser.position += 1;
 
-    numbers.push(Number.parseFloat(number.value || '0'));
+    numbers.push(Number.parseFloat(numberTok.value || '0'));
+
+    skipCommas(parser);
   }
 
   return numbers;
@@ -705,7 +681,7 @@ const parsePathCommandSmoothQuadraticBezierCurveTo = (
   };
 };
 
-const pathPathCommandEllipticalArcComponents = (
+const parsePathCommandEllipticalArcComponents = (
   parser: Parser<PathToken>
 ): EllipticalArcComponents | Error => {
   if (parserIsEof(parser)) {
@@ -719,6 +695,8 @@ const pathPathCommandEllipticalArcComponents = (
   if (rad instanceof Error) {
     return rad;
   }
+
+  skipCommas(parser);
 
   ///
 
@@ -740,6 +718,8 @@ const pathPathCommandEllipticalArcComponents = (
 
   const rotation = Number.parseFloat(rotationToken.value || '0');
 
+  skipCommas(parser);
+
   ///
 
   const flagsToken = parsePathCommandPoint(parser);
@@ -747,6 +727,8 @@ const pathPathCommandEllipticalArcComponents = (
   if (flagsToken instanceof Error) {
     return flagsToken;
   }
+
+  skipCommas(parser);
 
   ///
 
@@ -786,25 +768,25 @@ const parsePathCommandEllipticalArc = (
   const arcs: EllipticalArcComponents[] = [];
 
   while (!parserIsEof(parser)) {
+    skipCommas(parser);
+
     const peek = parser.tokens[parser.position];
 
-    if (
-      peek?.kind === 'command' ||
-      peek?.kind === 'comma' ||
-      peek?.kind === 'eof'
-    ) {
+    if (peek?.kind === 'command' || peek?.kind === 'eof') {
       break;
     }
 
     ///
 
-    const arc = pathPathCommandEllipticalArcComponents(parser);
+    const arc = parsePathCommandEllipticalArcComponents(parser);
 
     if (arc instanceof Error) {
       return arc;
     }
 
     arcs.push(arc);
+
+    skipCommas(parser);
   }
 
   ///
@@ -858,6 +840,8 @@ const parsePathCommand = (
   }
 
   ///
+
+  skipCommas(parser);
 
   const peek = parser.tokens[parser.position];
 
@@ -929,6 +913,19 @@ const parseSubPath = (parser: Parser<PathToken>): SubPath | Error => {
   const commands: SubPath = [];
 
   while (!parserIsEof(parser)) {
+    // If this isn't the first command in this subpath and we see a
+    // new 'M'/'m', stop and let parseSubPaths start a new SubPath
+
+    const peek = parser.tokens[parser.position];
+
+    if (
+      commands.length > 0 &&
+      peek?.kind === 'command' &&
+      (peek.value === 'M' || peek.value === 'm')
+    ) {
+      break;
+    }
+
     const command = parsePathCommand(parser);
 
     if (command instanceof Error) {
@@ -1003,14 +1000,14 @@ export const parsePath = (input: string): Path | Error => {
 
 // path stringification
 
-export const stringifyPathInstruction = (cmd: PathCommand): string => {
+export const stringifyPathCommand = (cmd: PathCommand): string => {
   switch (cmd.kind) {
     case 'moveTo': {
       if (!cmd.points) {
         return '';
       }
 
-      return `${cmd.mode ? 'M' : 'm'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'M' : 'm'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
     }
 
     case 'lineTo': {
@@ -1018,7 +1015,7 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
         return '';
       }
 
-      return `${cmd.mode ? 'L' : 'l'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'L' : 'l'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
     }
 
     case 'hLineTo': {
@@ -1026,7 +1023,7 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
         return '';
       }
 
-      return `${cmd.mode ? 'H' : 'h'} ${cmd.x.join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'H' : 'h'} ${cmd.x.join(' ')}`;
     }
 
     case 'vLineTo': {
@@ -1034,7 +1031,7 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
         return '';
       }
 
-      return `${cmd.mode ? 'V' : 'v'} ${cmd.y.join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'V' : 'v'} ${cmd.y.join(' ')}`;
     }
 
     case 'curveTo': {
@@ -1042,7 +1039,7 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
         return '';
       }
 
-      return `${cmd.mode ? 'C' : 'c'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'C' : 'c'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
     }
 
     case 'smoothCurveTo': {
@@ -1050,7 +1047,7 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
         return '';
       }
 
-      return `${cmd.mode ? 'S' : 's'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'S' : 's'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
     }
 
     case 'quadraticBezierCurveTo': {
@@ -1058,7 +1055,7 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
         return '';
       }
 
-      return `${cmd.mode ? 'Q' : 'q'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'Q' : 'q'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
     }
 
     case 'smoothQuadraticBezierCurveTo': {
@@ -1066,7 +1063,7 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
         return '';
       }
 
-      return `${cmd.mode ? 'T' : 't'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'T' : 't'} ${cmd.points.map(p => `${p.x},${p.y}`).join(' ')}`;
     }
 
     case 'ellipticalArc': {
@@ -1085,10 +1082,14 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
           return '';
         }
 
-        return `${rad.x},${rad.y} ${xRot} ${flags.x ? 1 : 0} ${flags.y ? 1 : 0} ${end.x},${end.y}`;
+        const largeArcFlag = flags.x === 1 ? 1 : 0;
+
+        const sweepFlag = flags.y === 1 ? 1 : 0;
+
+        return `${rad.x},${rad.y} ${xRot} ${largeArcFlag} ${sweepFlag} ${end.x},${end.y}`;
       });
 
-      return `${cmd.mode ? 'A' : 'a'} ${arcs.join(' ')}`;
+      return `${cmd.mode === PathCoordMode.Absolute ? 'A' : 'a'} ${arcs.join(' ')}`;
     }
 
     case 'closePath': {
@@ -1104,7 +1105,7 @@ export const stringifyPathInstruction = (cmd: PathCommand): string => {
 export const stringifySubPath = (subPath: SubPath): string => {
   return subPath
     .map(instr => {
-      return stringifyPathInstruction(instr);
+      return stringifyPathCommand(instr);
     })
     .join(' ');
 };
@@ -1154,14 +1155,11 @@ export const deriveOnCurvePoints = (subPath: SubPath): CoordModePathPoint[] => {
 
       case 'hLineTo': {
         if (cmd.x) {
-          const y = pos.point.y;
-
-          for (const x of cmd.x) {
-            if (!x && cmd.mode === PathCoordMode.Relative) {
-              continue;
-            }
-
-            const p = { x, y };
+          for (const n of cmd.x) {
+            const p: PathPoint =
+              (cmd.mode || PathCoordMode.Absolute) === PathCoordMode.Absolute
+                ? { x: n, y: pos.point.y }
+                : { x: n, y: 0 };
 
             const pp: CoordModePathPoint = {
               mode: cmd.mode || PathCoordMode.Absolute,
@@ -1179,14 +1177,11 @@ export const deriveOnCurvePoints = (subPath: SubPath): CoordModePathPoint[] => {
 
       case 'vLineTo': {
         if (cmd.y) {
-          const x = pos.point.x;
-
-          for (const y of cmd.y) {
-            if (!y && cmd.mode === PathCoordMode.Relative) {
-              continue;
-            }
-
-            const p = { x, y };
+          for (const n of cmd.y) {
+            const p: PathPoint =
+              (cmd.mode || PathCoordMode.Absolute) === PathCoordMode.Absolute
+                ? { x: pos.point.x, y: n }
+                : { x: 0, y: n };
 
             const pp: CoordModePathPoint = {
               mode: cmd.mode || PathCoordMode.Absolute,
@@ -1313,7 +1308,7 @@ export const onCurvePointsToAbsolute = (
 ): PathPoint[] => {
   const pointsAbs: PathPoint[] = [];
 
-  const posAbs = { x: 0, y: 0 };
+  let posAbs = { x: 0, y: 0 };
 
   for (const pp of points) {
     const p = pp.point;
@@ -1321,17 +1316,17 @@ export const onCurvePointsToAbsolute = (
     const pointAbs =
       pp.mode === PathCoordMode.Absolute
         ? p
-        : {
-            x: posAbs.x + p.x,
-            y: posAbs.y + p.y,
-          };
+        : { x: posAbs.x + p.x, y: posAbs.y + p.y };
 
     pointsAbs.push(pointAbs);
+
+    posAbs = pointAbs;
   }
 
   return pointsAbs;
 };
 
+// note: does not account for curve extrema
 export const getPathBoundingBox = (
   path: Path
 ): [number, number, number, number] | null => {
