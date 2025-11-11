@@ -43,19 +43,17 @@ export const lexerMatch = (
     return false;
   }
 
-  const _length =
-    Math.max(
-      1,
-      typeof value === 'string' && length > value.length ? value.length : length
-    ) + distance;
+  const matchLen = typeof value === 'string' ? value.length : length;
 
-  const end = lexer.position + _length;
+  const windowLen = Math.max(1, matchLen) + distance;
+
+  const end = lexer.position + windowLen;
 
   if (end > lexer.source.contents.length) {
     return false;
   }
 
-  const peek = lexerPeekLength(lexer, _length);
+  const peek = lexerPeekLength(lexer, windowLen);
 
   if (peek instanceof Error) {
     return false;
@@ -63,21 +61,13 @@ export const lexerMatch = (
 
   const peekAtDistance = peek.slice(distance);
 
-  if (peekAtDistance === null || peekAtDistance === undefined) {
+  if (peekAtDistance == null) {
     return false;
   }
 
   return typeof value === 'string'
-    ? peekAtDistance === value
+    ? peekAtDistance.slice(0, matchLen) === value
     : value(peekAtDistance);
-};
-
-export const isDigit = (c: string): boolean => {
-  return c >= '0' && c <= '9';
-};
-
-export const isNumberSignificand = (c: string): boolean => {
-  return isDigit(c) || c === 'e' || c === 'E' || c === '-';
 };
 
 // parsing stuff

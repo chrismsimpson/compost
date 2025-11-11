@@ -129,7 +129,7 @@ export const migrateDb = async (options?: {
   applyMigrationsOverride?: boolean;
 }) => {
   const isProd = process.env.NODE_ENV === 'production';
-  const isTest = process.env.NODE_ENV === 'text';
+  const isTest = process.env.NODE_ENV === 'test';
   const shouldExit = options?.shouldExit ?? true;
   const applyMigrationsOverride = options?.applyMigrationsOverride ?? false;
 

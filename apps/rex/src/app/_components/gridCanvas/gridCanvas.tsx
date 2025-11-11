@@ -9,7 +9,7 @@ import {
   type WheelEvent,
 } from 'react';
 import { Application, extend } from '@pixi/react';
-import { useGridCanvasStore } from '~/app/stores/useGridCanvasStore';
+import { useGridCanvasStore } from '~/app/stores/grid-canvas';
 import { DotGrid } from '~/app/_components/gridCanvas/dotGrid/dotGrid';
 import {
   Matrix,

@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '~/app/lib/cn';
-import { useGridCanvasStore } from '~/app/stores/useGridCanvasStore';
+import { useGridCanvasStore } from '~/app/stores/grid-canvas';
 import {
   Tooltip,
   TooltipTrigger,

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Transform } from 'pixi.js';
-import { Mutable } from '@compost/common/types/mutable';
+import { Mutable } from '@compost/common/mutable';
 
 export const GRID_CANVAS_BOUND = 1000;
 

@@ -11,7 +11,7 @@ import { dotGridProgram } from '~/app/_components/gridCanvas/dotGrid/dotGrid.sha
 import {
   useGridCanvasStore,
   GRID_CANVAS_BOUND,
-} from '~/app/stores/useGridCanvasStore';
+} from '~/app/stores/grid-canvas';
 import { cardGeometry } from '~/app/_components/gridCanvas/card/card.geometry';
 
 interface DotGridProps {
