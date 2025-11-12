@@ -64,6 +64,12 @@ export const useGridCanvasStore = create<GridCanvasState>()(
   subscribeWithSelector((set, get) => {
     const transform = new Transform();
 
+    const setZoom = (zoom: number) => {
+      transform.scale.set(zoom, zoom);
+
+      set({ zoom });
+    };
+
     return {
       private: {
         canvasSize: [0, 0],
@@ -139,9 +145,8 @@ export const useGridCanvasStore = create<GridCanvasState>()(
         );
 
         transform.position.set(tx, ty);
-        transform.scale.set(newZoom, newZoom);
 
-        set({ zoom: newZoom });
+        setZoom(newZoom);
       },
 
       scrollCanvas: (dx: number, dy: number) => {
@@ -211,9 +216,7 @@ export const useGridCanvasStore = create<GridCanvasState>()(
           canvasCenter[1] - translatedY * newZoom
         );
 
-        transform.scale.set(newZoom, newZoom);
-
-        set({ zoom: newZoom });
+        setZoom(newZoom);
       },
 
       zoomOut: () => {
@@ -242,9 +245,7 @@ export const useGridCanvasStore = create<GridCanvasState>()(
           canvasCenter[1] - translatedY * newZoom
         );
 
-        transform.scale.set(newZoom, newZoom);
-
-        set({ zoom: newZoom });
+        setZoom(newZoom);
       },
     };
   })

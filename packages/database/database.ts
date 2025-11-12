@@ -15,6 +15,8 @@ import postgres from 'postgres';
 import * as schema from './schema';
 import { DrizzleLogger } from './utils';
 
+export * from 'drizzle-orm';
+
 dotenv.config();
 
 const connectionConfig = (databaseUrl: string) => {

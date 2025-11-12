@@ -3,11 +3,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { CanvasZoom } from '~/app/_components/gridCanvas/zoom/canvasZoom';
-import { CanvasToolbar } from '~/app/_components/gridCanvas/toolbar/canvasToolbar';
+import { CanvasZoom } from '~/app/_components/gridCanvas/zoom/canvas-zoom';
+import { CanvasToolbar } from '~/app/_components/gridCanvas/toolbar/canvas-toolbar';
 
 const GridCanvas = dynamic(
-  () => import('~/app/_components/gridCanvas/gridCanvas'),
+  () => import('~/app/_components/gridCanvas/grid-canvas'),
   {
     loading: () => (
       <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800" />

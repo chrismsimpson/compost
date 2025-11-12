@@ -19,6 +19,8 @@ import {
   type Application as PixiApp,
 } from 'pixi.js';
 import { useTheme } from 'next-themes';
+import { useParams } from 'next/navigation';
+import { api as vanillaApi } from '~/trpc/vanilla';
 
 extend({ Mesh });
 
@@ -28,14 +30,12 @@ export default memo(function GridCanvas() {
 
   const canvasSize = useGridCanvasStore(state => state.private.canvasSize);
   const setCanvasSize = useGridCanvasStore(state => state.setCanvasSize);
-
   const transform = useGridCanvasStore(state => state.transform);
-
   const setIsFocused = useGridCanvasStore(state => state.setIsFocused);
-
   const zoomCanvas = useGridCanvasStore(state => state.zoomCanvas);
-
   const scrollCanvas = useGridCanvasStore(state => state.scrollCanvas);
+
+  const { surfaceId } = useParams<{ surfaceId: string }>();
 
   const appRef = useRef<PixiApp | null>(null);
 
@@ -45,6 +45,8 @@ export default memo(function GridCanvas() {
   const zoomLevel = transform.scale.x;
 
   const [opacity, setOpacity] = useState(1);
+
+  // measure on mount
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -62,6 +64,17 @@ export default memo(function GridCanvas() {
       setIsFocused(false);
     };
   }, [setCanvasSize, setIsFocused]);
+
+  // load init data
+
+  useEffect(() => {
+    vanillaApi.surface.getSurfaceData
+      .query({
+        surfaceId,
+      })
+      .then(data => {})
+      .catch(err => {});
+  }, [surfaceId]);
 
   const handleResize = (_: UIEvent | undefined) => {
     setOpacity(0);
