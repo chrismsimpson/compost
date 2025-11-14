@@ -1,48 +1,6 @@
 import { z } from 'zod';
 
-// db layer
-
-export const rectDataSchema = z.object({
-  kind: z.literal('rect'),
-  stroke: z.string().nullable(),
-  fill: z.string().nullable(),
-  strokeWidth: z.number().nullable(),
-  rx: z.number().nullable(),
-  ry: z.number().nullable(),
-});
-
-export const pathDataSchema = z.object({
-  kind: z.literal('path'),
-  stroke: z.string().nullable(),
-  fill: z.string().nullable(),
-  strokeWidth: z.number().nullable(),
-  d: z.string(),
-});
-
-export const shapeDataSchema = z.discriminatedUnion('kind', [
-  pathDataSchema,
-  rectDataSchema,
-]);
-
-export type ShapeData = z.infer<typeof shapeDataSchema>;
-
-///
-
-export const commentDataSchema = z.object({
-  text: z.string(),
-});
-
-export type CommentData = z.infer<typeof commentDataSchema>;
-
-///
-
-export const nodeDataSchema = z.union([shapeDataSchema, commentDataSchema]);
-
-export type NodeData = z.infer<typeof nodeDataSchema>;
-
-///
-
-// app layer
+// app layer - nodes
 
 export const bbSchema = z.object({
   min_x: z.number(),
@@ -52,9 +10,11 @@ export const bbSchema = z.object({
 });
 
 export const baseShapeSchema = z.object({
-  type: z.string(),
+  id: z.string(),
+  type: z.literal('shape'),
   x: z.number(),
   y: z.number(),
+  z: z.number().nullable(),
   width: z.number(),
   height: z.number(),
   bb: bbSchema,
@@ -86,9 +46,11 @@ export const shapeSchema = z.discriminatedUnion('kind', [
 export type Shape = z.infer<typeof shapeSchema>;
 
 export const toShape = (
+  id: string,
   type: 'shape',
   x: number | null,
   y: number | null,
+  z: number | null,
   width: number | null,
   height: number | null,
   min_x: number | null,
@@ -104,6 +66,7 @@ export const toShape = (
   switch (data.kind) {
     case 'rect': {
       if (
+        id === null ||
         x === null ||
         y === null ||
         width === null ||
@@ -111,16 +74,17 @@ export const toShape = (
         min_x === null ||
         min_y === null ||
         max_x === null ||
-        max_y === null ||
-        data.kind !== 'rect'
+        max_y === null
       ) {
         return new Error('Invalid data for rect');
       }
 
       return {
+        id,
         type: 'shape',
         x,
         y,
+        z,
         width,
         height,
         bb: {
@@ -140,6 +104,7 @@ export const toShape = (
 
     case 'path': {
       if (
+        id === null ||
         x === null ||
         y === null ||
         width === null ||
@@ -147,16 +112,17 @@ export const toShape = (
         min_x === null ||
         min_y === null ||
         max_x === null ||
-        max_y === null ||
-        data.kind !== 'path'
+        max_y === null
       ) {
         return new Error('Invalid data for path');
       }
 
       return {
+        id,
         type: 'shape',
         x,
         y,
+        z,
         width,
         height,
         bb: {
@@ -182,7 +148,8 @@ export const toShape = (
 ///
 
 export const commentSchema = z.object({
-  type: z.string(),
+  id: z.string(),
+  type: z.literal('comment'),
   x: z.number(),
   y: z.number(),
   text: z.string(),
@@ -191,6 +158,7 @@ export const commentSchema = z.object({
 export type Comment = z.infer<typeof commentSchema>;
 
 export const toComment = (
+  id: string,
   type: 'comment',
   x: number | null,
   y: number | null,
@@ -200,11 +168,12 @@ export const toComment = (
     return new Error('Invalid type');
   }
 
-  if (x === null || y === null || !data.text) {
+  if (x === null || y === null) {
     return new Error('Invalid data for comment');
   }
 
   return {
+    id,
     type: 'comment',
     x,
     y,
@@ -222,9 +191,11 @@ export const nodeSchema = z.discriminatedUnion('type', [
 export type Node = z.infer<typeof nodeSchema>;
 
 export const toNode = (
+  id: string,
   type: 'shape' | 'comment',
   x: number | null,
   y: number | null,
+  z: number | null,
   width: number | null,
   height: number | null,
   min_x: number | null,
@@ -242,9 +213,11 @@ export const toNode = (
       }
 
       return toShape(
+        id,
         type,
         x,
         y,
+        z,
         width,
         height,
         min_x,
@@ -261,10 +234,64 @@ export const toNode = (
         return new Error('Invalid comment data');
       }
 
-      return toComment(type, x, y, commentData.data);
+      return toComment(id, type, x, y, commentData.data);
     }
 
     default:
       return new Error('Invalid type');
   }
 };
+
+// db layer
+
+export const rectDataSchema = z.object({
+  kind: z.literal('rect'),
+  stroke: z.string().nullable(),
+  fill: z.string().nullable(),
+  strokeWidth: z.number().nullable(),
+  rx: z.number().nullable(),
+  ry: z.number().nullable(),
+});
+
+export const pathDataSchema = z.object({
+  kind: z.literal('path'),
+  stroke: z.string().nullable(),
+  fill: z.string().nullable(),
+  strokeWidth: z.number().nullable(),
+  d: z.string(),
+});
+
+export const shapeDataSchema = z.discriminatedUnion('kind', [
+  pathDataSchema,
+  rectDataSchema,
+]);
+
+export type ShapeData = z.infer<typeof shapeDataSchema>;
+
+///
+
+export const commentDataSchema = z.object({
+  text: z.string().min(1),
+});
+
+export type CommentData = z.infer<typeof commentDataSchema>;
+
+///
+
+export const nodeDataSchema = z.union([shapeDataSchema, commentDataSchema]);
+
+export type NodeData = z.infer<typeof nodeDataSchema>;
+
+///
+
+// app layer - surfaces
+
+export const surfaceSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  deletedAt: z.date().nullable(),
+});
+
+export type Surface = z.infer<typeof surfaceSchema>;

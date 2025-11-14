@@ -18,18 +18,20 @@ interface DotGridProps {
   isDark: boolean;
   width: number;
   height: number;
-  transform: Transform;
   canvasRef: Ref<HTMLDivElement>;
 }
 
 export const DotGrid = memo(
   forwardRef<Mesh<Geometry, Shader>, DotGridProps>(
     function DotGrid(props, ref) {
-      const { isDark, width, height, transform, canvasRef } = props;
+      const { isDark, width, height, canvasRef } = props;
 
-      const canvasSize = useGridCanvasStore(state => state.private.canvasSize);
+      const canvasSize = useGridCanvasStore(state => state.canvasSize);
 
       const selectionBox = useGridCanvasStore(state => state.selectionBox);
+
+      const position = useGridCanvasStore(state => state.position);
+      const scale = useGridCanvasStore(state => state.scale);
 
       // TODO: come back and make these real
       const minX = 0;
@@ -50,21 +52,15 @@ export const DotGrid = memo(
       const uniforms = useMemo(
         () =>
           new UniformGroup({
-            translate: { value: transform.position, type: 'vec2<f32>' },
-            scale: { value: transform.scale, type: 'vec2<f32>' },
+            translate: { value: position, type: 'vec2<f32>' },
+            scale: { value: scale, type: 'vec2<f32>' },
             pixelRatio: { value: window.devicePixelRatio, type: 'f32' },
             boundingBox: { value: boundingBox.current, type: 'vec4<f32>' },
             canvasSize: { value: canvasSize, type: 'vec2<f32>' },
             selectionBox: { value: selectionBox.state, type: 'vec4<f32>' },
             isDark: { value: isDark ? 1.0 : 0.0, type: 'f32' },
           }),
-        [
-          transform.position,
-          transform.scale,
-          boundingBox.current,
-          canvasSize,
-          selectionBox.state,
-        ]
+        [position, scale, boundingBox.current, canvasSize, selectionBox.state]
       );
 
       const dotGridShader = useMemo(

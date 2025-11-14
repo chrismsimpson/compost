@@ -4,6 +4,7 @@ import {
   toNode,
   type Node,
   nodeDataSchema,
+  type Surface,
 } from '@compost/common/canvas';
 import { relations, sql } from 'drizzle-orm';
 import {
@@ -75,6 +76,16 @@ export const Surfaces = pgTable(
   table => []
 );
 
+export type SurfaceRow = typeof Surfaces.$inferSelect;
+
+export const rowToSurface = (row: SurfaceRow): Surface => ({
+  id: row.id,
+  name: row.name,
+  createdAt: row.createdAt,
+  updatedAt: row.updatedAt,
+  deletedAt: row.deletedAt,
+});
+
 export const Nodes = pgTable(
   'Nodes',
   {
@@ -112,9 +123,11 @@ export const rowToNode = (row: NodeRow): Node | Error => {
   }
 
   return toNode(
+    row.id,
     row.type,
     row.x,
     row.y,
+    row.z,
     row.width,
     row.height,
     row.min_x,

@@ -11,12 +11,14 @@ import { Toggle } from '~/app/_components/shadcn/toggle';
 import { MinusIcon, PlusIcon } from 'lucide-react';
 
 export const CanvasZoom = () => {
-  const zoom = useGridCanvasStore(s => s.zoom);
+  // const zoom = useGridCanvasStore(s => s.zoom);
+
+  const scale = useGridCanvasStore(state => state.scale);
 
   const zoomIn = useGridCanvasStore(state => state.zoomIn);
   const zoomOut = useGridCanvasStore(state => state.zoomOut);
 
-  const zoomPercent = (zoom * 100).toFixed(0);
+  const zoomPercent = (scale.x * 100).toFixed(0);
 
   return (
     <div

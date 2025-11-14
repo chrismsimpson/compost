@@ -6,7 +6,7 @@ import {
   type Parser,
   parserIsEof,
 } from './parsing';
-import type { Point } from './geom';
+import type { Point } from './geometry';
 
 type PathTokenKind = 'command' | 'number' | 'comma' | 'unknown' | 'eof';
 

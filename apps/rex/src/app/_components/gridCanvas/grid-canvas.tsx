@@ -28,9 +28,11 @@ export default memo(function GridCanvas() {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
 
-  const canvasSize = useGridCanvasStore(state => state.private.canvasSize);
+  const canvasSize = useGridCanvasStore(state => state.canvasSize);
   const setCanvasSize = useGridCanvasStore(state => state.setCanvasSize);
-  const transform = useGridCanvasStore(state => state.transform);
+  // const transform = useGridCanvasStore(state => state.transform);
+  const handleResizeInner = useGridCanvasStore(state => state.handleResize);
+  // const zoom = useGridCanvasStore(state => state.zoom);
   const setIsFocused = useGridCanvasStore(state => state.setIsFocused);
   const zoomCanvas = useGridCanvasStore(state => state.zoomCanvas);
   const scrollCanvas = useGridCanvasStore(state => state.scrollCanvas);
@@ -42,7 +44,7 @@ export default memo(function GridCanvas() {
   const ref = useRef<HTMLDivElement>(null);
   const dotGridRef = useRef<Mesh<Geometry, Shader>>(null);
 
-  const zoomLevel = transform.scale.x;
+  // const zoomLevel = transform.scale.x;
 
   const [opacity, setOpacity] = useState(1);
 
@@ -85,10 +87,12 @@ export default memo(function GridCanvas() {
     }
 
     setTimeout(() => {
-      const x: number = transform.position.x;
-      const y: number = transform.position.y;
+      // const x: number = transform.position.x;
+      // const y: number = transform.position.y;
 
-      transform.setFromMatrix(new Matrix(zoomLevel, 0, 0, zoomLevel, x, y));
+      // transform.setFromMatrix(new Matrix(zoom, 0, 0, zoom, x, y));
+
+      handleResizeInner();
 
       setOpacity(1);
     }, 50);
@@ -135,7 +139,8 @@ export default memo(function GridCanvas() {
 
           const mousePos = { x: e.pageX - bb.left, y: e.pageY - bb.top };
 
-          zoomCanvas((e.deltaY / 1000.0) * transform.scale.x, mousePos);
+          // zoomCanvas((e.deltaY / 1000.0) * transform.scale.x, mousePos);
+          zoomCanvas(e.deltaY / 1000.0, mousePos);
         } else {
           scrollCanvas(-e.deltaX, -e.deltaY);
         }
@@ -162,7 +167,7 @@ export default memo(function GridCanvas() {
           isDark={isDark}
           width={canvasSize[0]}
           height={canvasSize[1]}
-          transform={transform}
+          // transform={transform}
           canvasRef={ref}
         />
       </Application>

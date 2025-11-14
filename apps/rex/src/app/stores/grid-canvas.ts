@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Transform } from 'pixi.js';
 import { Mutable } from '@compost/common/mutable';
+import type { Point } from '@compost/common/geometry';
+import type { Node as CommonNode } from '@compost/common/canvas';
+import { Matrix } from 'pixi.js';
 
 export const GRID_CANVAS_BOUND = 1000;
 
@@ -37,14 +40,32 @@ const clampPanAxis = (
   return Math.min(maxTranslate, Math.max(minTranslate, translate));
 };
 
-export interface GridCanvasState {
-  private: {
-    canvasSize: [number, number];
+// nodes
+
+export type Node = CommonNode & {
+  selectedBy?: string;
+  editableBy?: string;
+  dragLock?: {
+    cursorOffset: Point;
+    lockedTo: string;
+    dragStart: Point;
   };
+  resizeLock?: {
+    lockedTo: string;
+    resizeStart: Point & { width: number; height: number };
+  };
+  hovered?: boolean;
+};
 
-  transform: Transform;
+// store
 
-  zoom: number;
+export interface GridCanvasState {
+  canvasSize: [number, number];
+
+  position: Point;
+  scale: Point;
+
+  handleResize: () => void;
 
   selectionBox: Mutable<[number, number, number, number]>;
 
@@ -64,27 +85,44 @@ export const useGridCanvasStore = create<GridCanvasState>()(
   subscribeWithSelector((set, get) => {
     const transform = new Transform();
 
-    const setZoom = (zoom: number) => {
-      transform.scale.set(zoom, zoom);
+    const setPositionInner = (x: number, y: number) => {
+      transform.position.set(x, y);
 
-      set({ zoom });
+      set({ position: { x, y } });
+    };
+
+    const setPositionAndScaleInner = (
+      x: number,
+      y: number,
+      scaleX: number,
+      scaleY: number
+    ) => {
+      transform.position.set(x, y);
+      transform.scale.set(scaleX, scaleY);
+
+      set({ position: { x, y }, scale: { x: scaleX, y: scaleY } });
     };
 
     return {
-      private: {
-        canvasSize: [0, 0],
+      canvasSize: [0, 0],
+
+      position: { x: transform.position.x, y: transform.position.y },
+      scale: { x: transform.scale.x, y: transform.scale.y },
+
+      handleResize: () => {
+        const x: number = transform.position.x;
+        const y: number = transform.position.y;
+        transform.setFromMatrix(
+          new Matrix(transform.scale.x, 0, 0, transform.position.x, x, y)
+        );
       },
-
-      transform,
-
-      zoom: transform.scale.x,
 
       selectionBox: new Mutable([0, 0, 0, 0]),
 
       setCanvasSize: (newSize: [number, number]) => {
-        set(state => ({
-          private: { ...state.private, canvasSize: newSize },
-        }));
+        set({
+          canvasSize: newSize,
+        });
       },
 
       isFocused: false,
@@ -92,11 +130,13 @@ export const useGridCanvasStore = create<GridCanvasState>()(
         set({ isFocused: focused });
       },
 
-      zoomCanvas: (d: number, mousePos: { x: number; y: number }) => {
+      zoomCanvas: (_d: number, mousePos: { x: number; y: number }) => {
         const {
-          private: { canvasSize },
-          transform,
+          canvasSize,
+          // transform
         } = get();
+
+        const d = _d * transform.scale.x;
 
         const oldZoom = transform.scale.x;
         const newZoom = Math.min(
@@ -144,16 +184,11 @@ export const useGridCanvasStore = create<GridCanvasState>()(
           BOUNDARY_BUFFER_PX * newZoom
         );
 
-        transform.position.set(tx, ty);
-
-        setZoom(newZoom);
+        setPositionAndScaleInner(tx, ty, newZoom, newZoom);
       },
 
       scrollCanvas: (dx: number, dy: number) => {
-        const {
-          private: { canvasSize },
-          transform,
-        } = get();
+        const { canvasSize } = get();
 
         const [canvasWidth, canvasHeight] = canvasSize;
 
@@ -187,14 +222,11 @@ export const useGridCanvasStore = create<GridCanvasState>()(
           BOUNDARY_BUFFER_PX * scale
         );
 
-        transform.position.set(tx, ty);
+        setPositionInner(tx, ty);
       },
 
       zoomIn: () => {
-        const {
-          private: { canvasSize },
-          transform,
-        } = get();
+        const { canvasSize } = get();
 
         const canvasCenter: [number, number] = [
           canvasSize[0] / 2,
@@ -211,19 +243,16 @@ export const useGridCanvasStore = create<GridCanvasState>()(
         const translatedX = (canvasCenter[0] - transform.position.x) / prevZoom;
         const translatedY = (canvasCenter[1] - transform.position.y) / prevZoom;
 
-        transform.position.set(
+        setPositionAndScaleInner(
           canvasCenter[0] - translatedX * newZoom,
-          canvasCenter[1] - translatedY * newZoom
+          canvasCenter[1] - translatedY * newZoom,
+          newZoom,
+          newZoom
         );
-
-        setZoom(newZoom);
       },
 
       zoomOut: () => {
-        const {
-          private: { canvasSize },
-          transform,
-        } = get();
+        const { canvasSize } = get();
 
         const canvasCenter: [number, number] = [
           canvasSize[0] / 2,
@@ -240,12 +269,12 @@ export const useGridCanvasStore = create<GridCanvasState>()(
         const translatedX = (canvasCenter[0] - transform.position.x) / prevZoom;
         const translatedY = (canvasCenter[1] - transform.position.y) / prevZoom;
 
-        transform.position.set(
+        setPositionAndScaleInner(
           canvasCenter[0] - translatedX * newZoom,
-          canvasCenter[1] - translatedY * newZoom
+          canvasCenter[1] - translatedY * newZoom,
+          newZoom,
+          newZoom
         );
-
-        setZoom(newZoom);
       },
     };
   })
