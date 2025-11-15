@@ -154,6 +154,8 @@ export const migrateDb = async (options?: {
       });
 
       console.log('Migration completed');
+
+      if (shouldExit && !isTest) process.exit(0);
     }
   } catch (error) {
     console.error('Error during migration: ', error);

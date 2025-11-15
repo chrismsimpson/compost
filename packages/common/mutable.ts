@@ -1,7 +1,7 @@
 export class Mutable<T> {
-  state: T;
+  value: T;
 
   constructor(initial: T) {
-    this.state = initial;
+    this.value = initial;
   }
 }

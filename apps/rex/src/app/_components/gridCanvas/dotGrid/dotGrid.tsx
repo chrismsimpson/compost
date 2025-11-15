@@ -57,10 +57,17 @@ export const DotGrid = memo(
             pixelRatio: { value: window.devicePixelRatio, type: 'f32' },
             boundingBox: { value: boundingBox.current, type: 'vec4<f32>' },
             canvasSize: { value: canvasSize, type: 'vec2<f32>' },
-            selectionBox: { value: selectionBox.state, type: 'vec4<f32>' },
+            selectionBox: { value: selectionBox.value, type: 'vec4<f32>' },
             isDark: { value: isDark ? 1.0 : 0.0, type: 'f32' },
           }),
-        [position, scale, boundingBox.current, canvasSize, selectionBox.state]
+        [
+          position,
+          scale,
+          boundingBox.current,
+          canvasSize,
+          selectionBox.value,
+          isDark,
+        ]
       );
 
       const dotGridShader = useMemo(

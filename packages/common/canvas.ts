@@ -11,6 +11,7 @@ export const bbSchema = z.object({
 
 export const baseShapeSchema = z.object({
   id: z.string(),
+  surfaceId: z.string(),
   type: z.literal('shape'),
   x: z.number(),
   y: z.number(),
@@ -47,6 +48,7 @@ export type Shape = z.infer<typeof shapeSchema>;
 
 export const toShape = (
   id: string,
+  surfaceId: string,
   type: 'shape',
   x: number | null,
   y: number | null,
@@ -66,7 +68,6 @@ export const toShape = (
   switch (data.kind) {
     case 'rect': {
       if (
-        id === null ||
         x === null ||
         y === null ||
         width === null ||
@@ -81,6 +82,7 @@ export const toShape = (
 
       return {
         id,
+        surfaceId,
         type: 'shape',
         x,
         y,
@@ -104,7 +106,6 @@ export const toShape = (
 
     case 'path': {
       if (
-        id === null ||
         x === null ||
         y === null ||
         width === null ||
@@ -119,6 +120,7 @@ export const toShape = (
 
       return {
         id,
+        surfaceId,
         type: 'shape',
         x,
         y,
@@ -149,6 +151,7 @@ export const toShape = (
 
 export const commentSchema = z.object({
   id: z.string(),
+  surfaceId: z.string(),
   type: z.literal('comment'),
   x: z.number(),
   y: z.number(),
@@ -159,6 +162,7 @@ export type Comment = z.infer<typeof commentSchema>;
 
 export const toComment = (
   id: string,
+  surfaceId: string,
   type: 'comment',
   x: number | null,
   y: number | null,
@@ -174,6 +178,7 @@ export const toComment = (
 
   return {
     id,
+    surfaceId,
     type: 'comment',
     x,
     y,
@@ -192,6 +197,7 @@ export type Node = z.infer<typeof nodeSchema>;
 
 export const toNode = (
   id: string,
+  surfaceId: string,
   type: 'shape' | 'comment',
   x: number | null,
   y: number | null,
@@ -214,6 +220,7 @@ export const toNode = (
 
       return toShape(
         id,
+        surfaceId,
         type,
         x,
         y,
@@ -234,7 +241,7 @@ export const toNode = (
         return new Error('Invalid comment data');
       }
 
-      return toComment(id, type, x, y, commentData.data);
+      return toComment(id, surfaceId, type, x, y, commentData.data);
     }
 
     default:

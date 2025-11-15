@@ -1,16 +1,26 @@
-export type Point = {
-  x: number;
-  y: number;
-};
+import { z } from 'zod';
 
-export type CanvasCoord = Point & {
-  space: 'canvas';
-};
+export const pointSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
 
-export type DOMCoord = Point & {
-  space: 'dom';
-};
+export type Point = z.infer<typeof pointSchema>;
 
-export type ScreenCoord = Point & {
-  space: 'screen';
-};
+export const canvasCoordSchema = pointSchema.extend({
+  space: z.literal('canvas'),
+});
+
+export type CanvasCoord = z.infer<typeof canvasCoordSchema>;
+
+export const domCoordSchema = pointSchema.extend({
+  space: z.literal('dom'),
+});
+
+export type DOMCoord = z.infer<typeof domCoordSchema>;
+
+export const screenCoordSchema = pointSchema.extend({
+  space: z.literal('screen'),
+});
+
+export type ScreenCoord = z.infer<typeof screenCoordSchema>;

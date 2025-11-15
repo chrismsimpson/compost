@@ -1,5 +1,5 @@
 {
-  "id": "111c7bc7-59e4-41da-b00c-d1a5e2c9f735",
+  "id": "183f15bc-b1c1-4170-b05b-693223f495f0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -13,6 +13,74 @@
           "type": "varchar(24)",
           "primaryKey": true,
           "notNull": true
+        },
+        "surfaceId": {
+          "name": "surfaceId",
+          "type": "varchar(24)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "x": {
+          "name": "x",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "y": {
+          "name": "y",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "width": {
+          "name": "width",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "height": {
+          "name": "height",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "z": {
+          "name": "z",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "min_x": {
+          "name": "min_x",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "min_y": {
+          "name": "min_y",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_x": {
+          "name": "max_x",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_y": {
+          "name": "max_y",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
         },
         "data": {
           "name": "data",
@@ -42,7 +110,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "Nodes_surfaceId_Surfaces_id_fk": {
+          "name": "Nodes_surfaceId_Surfaces_id_fk",
+          "tableFrom": "Nodes",
+          "tableTo": "Surfaces",
+          "columnsFrom": [
+            "surfaceId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
