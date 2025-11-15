@@ -1,12 +1,17 @@
 import { Header } from '~/app/one/header';
 import { ThemeProvider } from '~/app/_components/theme';
 import { TooltipProvider } from '~/app/_components/shadcn/tooltip';
+import { redirect } from 'next/navigation';
 
 export default async function PageLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // redirect('/one');
+  redirect('/two');
+  // redirect('/three');
+
   return (
     <ThemeProvider
       attribute="class"
