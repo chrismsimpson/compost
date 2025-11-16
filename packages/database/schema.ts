@@ -36,6 +36,15 @@ const surfaceId = {
     }),
 };
 
+const seedId = {
+  seedId: varchar('seedId', { length: cuidLength })
+    .notNull()
+    .references(() => Seeds.id, {
+      ...deleteCascadeAction,
+      ...updateCascadeAction,
+    }),
+};
+
 const createdAt = {
   createdAt: timestamp('createdAt', {
     mode: 'date',
@@ -149,3 +158,29 @@ export const mapNodes = (rows: NodeRow[]): Node[] | Error => {
   }
   return nodes;
 };
+
+export const Seeds = pgTable(
+  'Seeds',
+  {
+    ...idPrimaryKey,
+    name: varchar('name', { length: 255 }).notNull(),
+    ...createdAt,
+    ...updatedAt,
+    ...deletedAt,
+  },
+  table => []
+);
+
+export const Pins = pgTable(
+  'Pins',
+  {
+    ...idPrimaryKey,
+    ...seedId,
+    data: jsonb('data'),
+    position: integer('position').default(0).notNull(),
+    ...createdAt,
+    ...updatedAt,
+    ...deletedAt,
+  },
+  table => []
+);
