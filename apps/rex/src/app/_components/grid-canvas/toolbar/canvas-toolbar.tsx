@@ -16,15 +16,15 @@ export const CanvasToolbar = () => {
   return (
     <div
       className={cn(
-        // 'z-canvas-toolbar absolute bottom-8 left-1/2 -translate-x-1/2 bg-white shadow-lg rounded-md border border-gray-200 flex items-center justify-center p-2 gap-0.75' // HORIZONTAL BOTTOM
-        'z-canvas-toolbar absolute left-4 top-1/2 -translate-y-1/2 bg- shadow-lg rounded-md border flex flex-col items-center justify-center p-2 gap-0.75 bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-900' // VERTICAL LEFT
+        // 'z-canvas-toolbar absolute bottom-8 left-1/2 -translate-x-1/2 bg-white shadow-lg rounded-md border border-chrome-200 flex items-center justify-center p-2 gap-0.75' // HORIZONTAL BOTTOM
+        'z-canvas-toolbar absolute left-4 top-1/2 -translate-y-1/2 bg- shadow-lg rounded-md border flex flex-col items-center justify-center p-2 gap-1.5 bg-chrome-50 dark:bg-chrome-925 border-chrome-200 dark:border-chrome-950' // VERTICAL LEFT
       )}
     >
       <Tooltip>
         <TooltipTrigger asChild>
           <Toggle
             className={cn('group select-none border-0', {
-              'bg-neutral-700 dark:bg-neutral-400 dark:hover:bg-neutral-300':
+              'bg-chrome-700 dark:bg-chrome-400 dark:hover:bg-chrome-300':
                 cursorMode === 'select',
             })}
             pressed={cursorMode === 'select'}
@@ -32,8 +32,8 @@ export const CanvasToolbar = () => {
             onClick={() => {}}
           >
             <MousePointer2Icon
-              className={cn('size-4 stroke-zinc-900', {
-                'stroke-neutral-300 dark:stroke-neutral-800':
+              className={cn('size-4 stroke-chrome-900', {
+                'stroke-chrome-300 dark:stroke-chrome-800':
                   cursorMode === 'select',
               })}
             />
@@ -47,9 +47,9 @@ export const CanvasToolbar = () => {
         <TooltipTrigger asChild>
           <Toggle
             className={cn(
-              'group select-none border-0 bg-neutral-50 dark:bg-neutral-800 dark:hover:bg-neutral-600',
+              'group select-none border-0 bg-chrome-50 dark:bg-chrome-800 dark:hover:bg-chrome-600',
               {
-                'bg-zinc-700 ': cursorMode === 'node',
+                'bg-chrome-700 ': cursorMode === 'node',
               }
             )}
             pressed={cursorMode === 'node'}
@@ -58,9 +58,9 @@ export const CanvasToolbar = () => {
           >
             <SplinePointerIcon
               className={cn(
-                'size-4 stroke-neutral-900 dark:stroke-neutral-600 dark:group-hover:stroke-neutral-800',
+                'size-4 stroke-chrome-900 dark:stroke-chrome-600 dark:group-hover:stroke-chrome-800',
                 {
-                  'stroke-neutral-400 dark:stroke-neutral-500':
+                  'stroke-chrome-400 dark:stroke-chrome-500':
                     cursorMode === 'node',
                 }
               )}

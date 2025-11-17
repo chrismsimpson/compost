@@ -51,7 +51,7 @@ const PinCard = ({ pin, index }: { pin: Pin; index: number }) => {
       className={[
         'p-4 select-none rounded-2xl',
         'cursor-grab active:cursor-grabbing',
-        'border-neutral-300 dark:border-chrome-800',
+        'border-chrome-300 dark:border-chrome-800',
         isDragging ? 'opacity-30' : 'hover:border-chrome-600',
       ].join(' ')}
       draggable
@@ -188,10 +188,10 @@ const InputDock = () => {
     // biome-ignore lint/a11y/noStaticElementInteractions: ¯\_(ツ)_/¯
     <div
       className={[
-        'mt-4 rounded-2xl border border-neutral-300 bg-white dark:bg-chrome-900 dark:border-chrome-950',
+        'mt-4 rounded-2xl border border-chrome-300 bg-white dark:bg-chrome-900 dark:border-chrome-950',
         'p-3 pb-2 mb-4',
         'transition-colors',
-        isDragOver ? 'ring-2 ring-neutral-900' : '',
+        isDragOver ? 'ring-2 ring-chrome-900' : '',
       ].join(' ')}
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}

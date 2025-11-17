@@ -53,7 +53,7 @@ void main() {
   // base white colour
   vec3 bgLight = vec3(250.)/255.;
   // vec3 bgDark = vec3(64.)/255.;
-  vec3 bgDark = vec3(51.)/255.;
+  vec3 bgDark = vec3(31., 36., 43.)/255.;
   gl_FragColor = vec4(mix(bgLight, bgDark, isDark), 1.);
 
   // dots - use pythagoras to position the dot in the top-left of the cell
@@ -64,7 +64,7 @@ void main() {
   float opacity = (1. - (max(0., 0.4 - scale.x) * 3.));
 
   vec3 dotLight = vec3(212.)/255.;
-  vec3 dotDark = vec3(23.)/255.;
+  vec3 dotDark = vec3(15., 17., 23.)/255.;
   gl_FragColor = mix(gl_FragColor,
     vec4(mix(dotLight, dotDark, isDark), 1.),
     smoothstep(dotRadius, dotRadius * .99,length(dotCenter)) * opacity);
@@ -79,14 +79,14 @@ void main() {
 
   // draw bg
   vec3 outerLight = vec3(245.)/255.;
-  vec3 outerDark = vec3(38.)/255.;
+  vec3 outerDark = vec3(20., 23., 30.)/255.;
   gl_FragColor = mix(gl_FragColor, 
     vec4(mix(outerLight, outerDark, isDark), 1.),
     smoothstep(-0.,0.01, box));
 
   // draw boundary shadow
   vec3 shadLight = vec3(240.)/255.;
-  vec3 shadDark = vec3(34.)/255.;
+  vec3 shadDark = vec3(18., 20., 26.)/255.;
   gl_FragColor = mix(gl_FragColor, 
     vec4(mix(shadLight, shadDark, isDark), 1.),
     smoothstep(-0.,0.01, box) *
@@ -95,7 +95,7 @@ void main() {
 
   // stroke
   vec3 strokeLight = vec3(229.)/255.;
-  vec3 strokeDark = vec3(23.)/255.;
+  vec3 strokeDark = vec3(15., 17., 23.)/255.;
   gl_FragColor = mix(gl_FragColor, 
     vec4(mix(strokeLight, strokeDark, isDark),1.),
     smoothstep(-0.,.1, box) *

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCameraStore } from '~/app/three/cameraStore';
+import { useCameraStore } from '~/app/three/camera-store';
 
 export function CameraHUD() {
   const position = useCameraStore(state => state.position);
@@ -9,7 +9,7 @@ export function CameraHUD() {
   const zoom = useCameraStore(state => state.zoom);
 
   return (
-    <div className="pointer-events-none absolute top-4 left-4 z-50 rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-mono text-zinc-900 shadow-lg">
+    <div className="pointer-events-none absolute top-4 left-4 z-50 rounded-md border border-chrome-200 bg-white px-3 py-2 text-xs font-mono text-chrome-900 shadow-lg">
       <span className="opacity-80">pos:</span>{' '}
       {position.map(n => n.toFixed(2)).join(', ')}
       <br />
@@ -20,8 +20,10 @@ export function CameraHUD() {
       {(fov !== undefined || zoom !== undefined) && (
         <>
           <br />
-          <span className="opacity-80">{fov !== undefined ? 'fov:' : 'zoom:'}</span>{' '}
-          {fov !== undefined ? fov.toFixed(2) : zoom!.toFixed(2)}
+          <span className="opacity-80">
+            {fov !== undefined ? 'fov:' : 'zoom:'}
+          </span>{' '}
+          {fov !== undefined ? fov.toFixed(2) : (zoom?.toFixed(2) ?? '')}
         </>
       )}
     </div>

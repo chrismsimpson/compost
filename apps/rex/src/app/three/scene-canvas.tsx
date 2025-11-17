@@ -2,9 +2,13 @@
 
 import { Canvas } from '@react-three/fiber';
 import { useMemo } from 'react';
-import { CameraHUD } from '~/app/three/CameraHUD';
-import { FPSControls } from '~/app/three/FPSControls';
-import { buildGridPoints, TileLayout, type TileLayoutKey } from '~/app/three/grid';
+import { CameraHUD } from '~/app/three/camera-hud';
+import { FPSControls } from '~/app/three/fps-controls';
+import {
+  buildGridPoints,
+  TileLayout,
+  type TileLayoutKey,
+} from '~/app/three/grid';
 import { CAMERA_POSITION } from '~/constants/localStorage';
 
 export default function SceneCanvas() {

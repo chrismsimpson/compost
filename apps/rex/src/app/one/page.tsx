@@ -11,7 +11,7 @@ const GridCanvas = dynamic(
   () => import('~/app/_components/grid-canvas/grid-canvas'),
   {
     loading: () => (
-      <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800" />
+      <div className="w-full h-full bg-chrome-100 dark:bg-chrome-800" />
     ),
     ssr: false,
   }

@@ -23,7 +23,7 @@ export const CanvasZoom = () => {
   return (
     <div
       className={cn(
-        'z-canvas-toolbar fixed top-[66px] right-4 shadow-lg rounded-md border flex items-center justify-center p-2 gap-1 bg-neutral-50 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-900'
+        'z-canvas-toolbar fixed top-[66px] right-4 shadow-lg rounded-md border flex items-center justify-center p-2 gap-1 bg-chrome-50 dark:bg-chrome-925 border-chrome-200 dark:border-chrome-950'
       )}
     >
       <Tooltip>
@@ -35,7 +35,7 @@ export const CanvasZoom = () => {
           >
             <MinusIcon
               className={cn(
-                'size-4 stroke-neutral-900 dark:stroke-neutral-400 dark:group-hover:stroke-neutral-300'
+                'size-4 stroke-chrome-900 dark:stroke-chrome-400 dark:group-hover:stroke-chrome-300'
               )}
             />
           </Toggle>
@@ -43,7 +43,7 @@ export const CanvasZoom = () => {
         <TooltipContent>Zoom Out</TooltipContent>
       </Tooltip>
 
-      <span className="font-medium text-neutral-600 w-16 text-center dark:text-neutral-400">
+      <span className="font-medium text-chrome-600 w-16 text-center dark:text-chrome-400">
         {zoomPercent}%
       </span>
 
@@ -56,7 +56,7 @@ export const CanvasZoom = () => {
           >
             <PlusIcon
               className={cn(
-                'size-4 stroke-neutral-900 dark:stroke-neutral-400 dark:group-hover:stroke-neutral-300'
+                'size-4 stroke-chrome-900 dark:stroke-chrome-400 dark:group-hover:stroke-chrome-300'
               )}
             />
           </Toggle>

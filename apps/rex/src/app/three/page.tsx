@@ -1,5 +1,5 @@
-import SceneCanvas from '~/app/three/SceneCanvas';
+import SceneCanvas from '~/app/three/scene-canvas';
 
-export default function Page() { 
+export default function Page() {
   return <SceneCanvas />;
 }
