@@ -7,11 +7,10 @@ import {
 } from '~/app/_components/shadcn/tooltip';
 import { Toggle } from '~/app/_components/shadcn/toggle';
 import { useState } from 'react';
+import type { CursorMode } from '@compost/common/canvas';
 
 export const CanvasToolbar = () => {
-  type Cursor = 'select' | 'node';
-
-  const [cursorMode, _] = useState<Cursor>('select');
+  const [cursorMode, _] = useState<CursorMode>('select');
 
   return (
     <div

@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+// app layer - stuff
+
+export const cursorModeSchema = z.enum(['select', 'node']);
+
+export type CursorMode = z.infer<typeof cursorModeSchema>;
+
 // app layer - nodes
 
 export const bbSchema = z.object({

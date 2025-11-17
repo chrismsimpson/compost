@@ -2,10 +2,15 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { Transform } from 'pixi.js';
 import { Mutable } from '@compost/common/mutable';
-import { type Point, pointSchema } from '@compost/common/geometry';
+import {
+  type Point,
+  pointSchema,
+  type CanvasCoord,
+} from '@compost/common/geometry';
 import {
   type Node as CommonNode,
   nodeSchema as commonNodeSchema,
+  type CursorMode,
 } from '@compost/common/canvas';
 import { Matrix } from 'pixi.js';
 import { throttle, pick, uniq } from 'lodash';
@@ -143,6 +148,11 @@ export interface GridCanvasState {
   heldKey: Record<string, boolean>;
   setHeldKey: (keyCode: string, isHeld: boolean) => void;
 
+  // TODO: cursor override?
+
+  cursorPosition: Transform;
+  scrollVelocity: Point;
+
   position: Point;
   scale: Point;
 
@@ -158,6 +168,8 @@ export interface GridCanvasState {
   handleResize: () => void;
 
   selectionBox: Mutable<[number, number, number, number]>;
+
+  isSelecting: Mutable<boolean>;
 
   setCanvasSize: (size: [number, number]) => void;
 
@@ -228,6 +240,9 @@ export const useGridCanvasStore = create<GridCanvasState>()(
         );
       },
 
+      cursorPosition: new Transform(),
+      scrollVelocity: { x: 0, y: 0 },
+
       position: { x: transform.position.x, y: transform.position.y },
       scale: { x: transform.scale.x, y: transform.scale.y },
 
@@ -249,6 +264,8 @@ export const useGridCanvasStore = create<GridCanvasState>()(
       },
 
       selectionBox: new Mutable([0, 0, 0, 0]),
+
+      isSelecting: new Mutable(false),
 
       setCanvasSize: (newSize: [number, number]) => {
         set({
@@ -698,9 +715,28 @@ export const persistUpdates = throttle(
 
 // actions
 
-export type GridCanvasAction = {
-  type: 'clicked_grid';
-};
+export type GridCanvasAction =
+  | {
+      type: 'clicked_grid';
+      payload: {
+        coord: CanvasCoord;
+        cursorMode: CursorMode;
+      };
+    }
+  | {
+      type: 'pointer_down_grid';
+      payload: {
+        coord: CanvasCoord;
+        cursorMode: CursorMode;
+      };
+    }
+  | {
+      type: 'pointer_up_grid';
+      payload: {
+        coord: CanvasCoord;
+        cursorMode: CursorMode;
+      };
+    };
 
 // reducer
 
@@ -715,6 +751,49 @@ function reducer(
   setState: typeof useGridCanvasStore.setState
 ): (draft: Draft<Record<string, Node>>) => void {
   switch (action.type) {
+    case 'pointer_down_grid': {
+      Object.assign(state.selectionBox.value, [
+        action.payload.coord.x,
+        action.payload.coord.y,
+        0,
+        0,
+      ]);
+
+      state.isSelecting.value = true;
+
+      return _ => {
+        null;
+      };
+    }
+
+    case 'pointer_up_grid': {
+      return draft => {
+        const userIsEditing = Object.values(draft).some(
+          n => n.editableBy === actor
+        );
+
+        if (
+          !userIsEditing &&
+          state.isSelecting.value &&
+          state.selectionBox.value[2] === 0 &&
+          state.selectionBox.value[3] === 0
+        ) {
+          for (const nodeId in draft) {
+            const node = draft?.[nodeId];
+            if (node?.selectedBy === actor) {
+              node.selectedBy = undefined;
+            }
+          }
+        }
+
+        Object.assign(state.selectionBox.value, [0, 0, 0, 0]);
+
+        state.isSelecting.value = false;
+
+        // useUIStore.getState().setCursorMode('select');
+      };
+    }
+
     case 'clicked_grid': {
       return draft => {
         if (Object.values(draft).find(n => n.editableBy === actor)) {
