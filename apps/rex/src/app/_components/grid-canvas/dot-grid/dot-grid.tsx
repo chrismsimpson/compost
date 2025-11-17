@@ -7,12 +7,12 @@ import {
   type Transform,
   UniformGroup,
 } from 'pixi.js';
-import { dotGridProgram } from '~/app/_components/gridCanvas/dotGrid/dotGrid.shader';
+import { dotGridProgram } from '~/app/_components/grid-canvas/dot-grid/dot-grid.shader';
 import {
   useGridCanvasStore,
   GRID_CANVAS_BOUND,
 } from '~/app/stores/grid-canvas';
-import { cardGeometry } from '~/app/_components/gridCanvas/card/card.geometry';
+import { cardGeometry } from '~/app/_components/grid-canvas/card/card.geometry';
 
 interface DotGridProps {
   isDark: boolean;

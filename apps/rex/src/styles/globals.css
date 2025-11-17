@@ -11,6 +11,22 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* chrome palette */
+  --color-chrome-50: #f9f9fa;
+  --color-chrome-100: #f1f2f4;
+  --color-chrome-200: #e0e2e6;
+  --color-chrome-300: #ccced5;
+  --color-chrome-400: #9095a2;
+  --color-chrome-500: #626673;
+  --color-chrome-600: #434955;
+  --color-chrome-700: #333843;
+  --color-chrome-800: #1f242b;
+  --color-chrome-900: #14171e;
+  --color-chrome-913: #12141a;
+  --color-chrome-925: #0f1117;
+  --color-chrome-937: #0c0f14;
+  --color-chrome-950: #0a0c10;
 }
 
 @media (prefers-color-scheme: dark) {

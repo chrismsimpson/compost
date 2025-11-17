@@ -1,16 +1,14 @@
-// import GridCanvas from '~/app/_components/gridCanvas/gridCanvas';
-
 'use client';
 
 import { useLayoutEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
-import { CanvasZoom } from '~/app/_components/gridCanvas/zoom/canvas-zoom';
-import { CanvasToolbar } from '~/app/_components/gridCanvas/toolbar/canvas-toolbar';
+import { CanvasZoom } from '~/app/_components/grid-canvas/zoom/canvas-zoom';
+import { CanvasToolbar } from '~/app/_components/grid-canvas/toolbar/canvas-toolbar';
 import { useGridCanvasStore } from '~/app/stores/grid-canvas';
 
 const GridCanvas = dynamic(
-  () => import('~/app/_components/gridCanvas/grid-canvas'),
+  () => import('~/app/_components/grid-canvas/grid-canvas'),
   {
     loading: () => (
       <div className="w-full h-full bg-neutral-100 dark:bg-neutral-800" />

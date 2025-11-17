@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { Application, extend } from '@pixi/react';
 import { useGridCanvasStore } from '~/app/stores/grid-canvas';
-import { DotGrid } from '~/app/_components/gridCanvas/dotGrid/dotGrid';
+import { DotGrid } from '~/app/_components/grid-canvas/dot-grid/dot-grid';
 import {
   Matrix,
   type Geometry,

@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { Badge } from '~/app/_components/shadcn/badge';
 import { Card, CardContent } from '~/app/_components/shadcn/card';
 import { ScrollArea } from '~/app/_components/shadcn/scroll-area';
@@ -14,7 +14,7 @@ const PinCard = ({ pin, index }: { pin: Pin; index: number }) => {
   const draggedPinId = usePinboardStore(s => s.draggedPinId);
   const setDraggedPinId = usePinboardStore(s => s.setDraggedPinId);
   const reorderByTarget = usePinboardStore(s => s.reorderByTarget);
-  const deletePin = usePinboardStore(s => s.deletePin); // NEW
+  const deletePin = usePinboardStore(s => s.deletePin);
 
   const isDragging = draggedPinId === pin.id;
 
@@ -51,19 +51,19 @@ const PinCard = ({ pin, index }: { pin: Pin; index: number }) => {
       className={[
         'p-4 select-none rounded-2xl',
         'cursor-grab active:cursor-grabbing',
-        'border-neutral-300 dark:border-gray-800',
-        isDragging ? 'opacity-30' : 'hover:border-gray-600',
+        'border-neutral-300 dark:border-chrome-800',
+        isDragging ? 'opacity-30' : 'hover:border-chrome-600',
       ].join(' ')}
       draggable
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
-      onClick={onClick} // NEW
+      onClick={onClick}
       data-pin-id={pin.id}
       data-index={index}
     >
       <CardContent className="p-0">
-        <div className="font-sans font-medium text-lg leading-tight break-words whitespace-pre-line dark:text-gray-300">
+        <div className="font-sans font-medium text-lg leading-tight break-words whitespace-pre-line dark:text-chrome-300">
           {pin.text}
         </div>
       </CardContent>
@@ -88,8 +88,8 @@ const PinColumn = () => {
 };
 
 const InputDock = () => {
-  const [value, setValue] = React.useState('');
-  const [isDragOver, setIsDragOver] = React.useState(false);
+  const [value, setValue] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const addPin = usePinboardStore(s => s.addPin);
   const attachments = usePinboardStore(s => s.attachments);
@@ -97,11 +97,11 @@ const InputDock = () => {
   const addAttachmentFromText = usePinboardStore(s => s.addAttachmentFromText);
   const removeAttachment = usePinboardStore(s => s.removeAttachment);
 
-  const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  // NEW: auto-grow up to 5 rows
   const MAX_ROWS = 5;
-  const adjustTextareaHeight = React.useCallback(() => {
+
+  const adjustTextareaHeight = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
 
@@ -125,12 +125,11 @@ const InputDock = () => {
       const text = value.trim();
       if (text.length > 0) {
         addPin(text);
-        setValue(''); // clearing value will trigger height reset via effect
+        setValue('');
       }
     }
   };
 
-  // Drag handlers unchanged...
   const onDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -163,8 +162,7 @@ const InputDock = () => {
     }
   };
 
-  // Focus on mount and when window regains focus
-  React.useEffect(() => {
+  useEffect(() => {
     const focusTextarea = () => {
       textareaRef.current?.focus();
     };
@@ -175,13 +173,12 @@ const InputDock = () => {
     };
   }, []);
 
-  // NEW: adjust height on mount and whenever value changes
-  React.useEffect(() => {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: ¯\_(ツ)_/¯
+  useEffect(() => {
     adjustTextareaHeight();
   }, [value, adjustTextareaHeight]);
 
-  // NEW: re-adjust on window resize (wrapping can change)
-  React.useEffect(() => {
+  useEffect(() => {
     const onResize = () => adjustTextareaHeight();
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
@@ -191,7 +188,7 @@ const InputDock = () => {
     // biome-ignore lint/a11y/noStaticElementInteractions: ¯\_(ツ)_/¯
     <div
       className={[
-        'mt-4 rounded-2xl border border-neutral-300 bg-white dark:bg-gray-900 dark:border-gray-950',
+        'mt-4 rounded-2xl border border-neutral-300 bg-white dark:bg-chrome-900 dark:border-chrome-950',
         'p-3 pb-2 mb-4',
         'transition-colors',
         isDragOver ? 'ring-2 ring-neutral-900' : '',
@@ -207,7 +204,7 @@ const InputDock = () => {
             <Badge
               key={a.key}
               variant="outline"
-              className="cursor-pointer text-base dark:text-gray-400 dark:border-gray-950"
+              className="cursor-pointer text-base dark:text-chrome-400 dark:border-chrome-950"
               title="Click to remove"
               onClick={() => removeAttachment(a.key)}
             >
@@ -222,10 +219,10 @@ const InputDock = () => {
         ref={textareaRef}
         className={[
           'w-full bg-transparent outline-none m-2',
-          'placeholder:text-gray-700',
+          'placeholder:text-chrome-700',
           'text-lg leading-tight ',
           'resize-none',
-          'overflow-y-auto', // NEW: show scrollbar when at max height
+          'overflow-y-auto',
         ].join(' ')}
         placeholder="Make it sing…"
         rows={1}
@@ -239,7 +236,7 @@ const InputDock = () => {
 
 export default function Page() {
   return (
-    <div className="h-[calc(100vh-50px)] w-full flex justify-center px-4 overflow-hidden dark:bg-[#0a101c]">
+    <div className="h-[calc(100vh-50px)] w-full flex justify-center px-4 overflow-hidden dark:bg-chrome-925">
       <div className="w-full max-w-3xl flex flex-col flex-1 min-h-0">
         {/* Top: pin column (scrolls when it hits the input) */}
         <div className="flex-1 min-h-0">
